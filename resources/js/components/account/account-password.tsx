@@ -9,10 +9,10 @@ import {
   Grid,
   TextField,
 } from '@mui/material'
-import useAuth from '/@/hooks/useAuth'
+import useAuth from '../../context/useAuth'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import useApp from '/@/hooks/useApp'
+import useApp from '../../context/useApp'
 import { phoneRegExp } from '/@/enums/regex'
 import { LoadingButton } from '@mui/lab'
 import { changePasswordApi } from '/@/api/auth'

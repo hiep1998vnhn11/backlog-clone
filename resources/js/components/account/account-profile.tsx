@@ -8,12 +8,12 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
-import useAuth from '/@/hooks/useAuth'
+import useAuth from '../../context/useAuth'
 import Dropzone from '/@/components/Dropzone'
 import { useCallback, useState } from 'react'
 import Dialog from '/@/components/Dialog'
 import { uploadApi } from '/@/api/upload'
-import useApp from '/@/hooks/useApp'
+import useApp from '../../context/useApp'
 export const AccountProfile: React.FC<any> = (props) => {
   const { user, updateUser } = useAuth()
   const { toastError, toastSuccess } = useApp()

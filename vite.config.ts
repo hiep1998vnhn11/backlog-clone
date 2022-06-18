@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
+import AutoImport from 'unplugin-auto-import/vite'
 
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir)
@@ -25,7 +26,13 @@ export default defineConfig({
     host: true,
     port: 8080,
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    AutoImport({
+      imports: ['react', 'react-router-dom'],
+      dts: './resources/types/auto-imports.d.ts',
+    }),
+  ],
   build: {
     target: 'es2015',
     outDir: OUTPUT_DIR,

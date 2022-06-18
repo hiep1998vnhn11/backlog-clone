@@ -21,7 +21,7 @@ const NotFound = () => (
         }}
       >
         <Typography align="center" color="textPrimary" variant="h1">
-          Không tìm thấy trang bạn đang tìm
+          The content could not be found.
         </Typography>
         <Box sx={{ textAlign: 'center' }}>
           <img
@@ -41,7 +41,7 @@ const NotFound = () => (
             sx={{ mt: 3 }}
             variant="contained"
           >
-            Trở về trang chủ
+            Dashboard
           </Button>
         </Link>
       </Box>

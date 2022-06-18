@@ -77,10 +77,6 @@ class Controller extends BaseController
     protected function respondWithToken($token)
     {
         $user = auth()->user();
-        $user->all_permissions = $user->getAllPermissions()->pluck('name');
-        $user->all_roles = $user->roles->pluck('name');
-        unset($user->permissions);
-        unset($user->roles);
         return response()->json([
             'code' => 0,
             'message' => 'Login success!',

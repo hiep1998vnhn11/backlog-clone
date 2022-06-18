@@ -1,11 +1,10 @@
-import { useLocation, Link as NextLink, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Box, Button, Container, TextField, Typography } from '@mui/material'
+import { Box, Container, TextField, Typography } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import useAuth from '/@/hooks/useAuth'
-import { useState } from 'react'
-import useApp from '../hooks/useApp'
+import useAuth from '../context/useAuth'
+import useApp from '../context/useApp'
 const Login = () => {
   const { login } = useAuth()
   const { toastSuccess, toastError } = useApp()
@@ -17,16 +16,16 @@ const Login = () => {
       password: '',
     },
     validationSchema: Yup.object({
-      username: Yup.string().max(255).required('Hãy nhập tài khoản của bạn'),
-      password: Yup.string().max(255).required('Bạn chưa nhập mật khẩu'),
+      username: Yup.string().max(255).required('Please enter your email!'),
+      password: Yup.string().max(255).required('Please enter your password!'),
     }),
     onSubmit: async () => {
       try {
         setLoading(true)
         await login(formik.values.username, formik.values.password)
-        toastSuccess('Đăng nhập thành công')
+        toastSuccess('Login successfully!')
       } catch (err) {
-        toastError('Đăng nhập thất bại! Sai tên tài khoản hoặc mật khẩu')
+        toastError('Login failed! Wrong email or password')
       } finally {
         setLoading(false)
       }
@@ -57,17 +56,17 @@ const Login = () => {
         <form onSubmit={formik.handleSubmit}>
           <Box sx={{ my: 3 }}>
             <Typography color="textPrimary" variant="h4">
-              Đăng nhập
+              Login
             </Typography>
             <Typography color="textSecondary" gutterBottom variant="body2">
-              CNTShip - Giao hàng Hà Nội
+              {import.meta.env.VITE_APP_NAME || 'Backlog'}
             </Typography>
           </Box>
           <TextField
             fullWidth
             error={Boolean(formik.touched.username && formik.errors.username)}
             helperText={formik.touched.username && formik.errors.username}
-            label="Tài khoản"
+            label="Your email"
             margin="normal"
             name="username"
             onBlur={formik.handleBlur}
@@ -80,7 +79,7 @@ const Login = () => {
             error={Boolean(formik.touched.password && formik.errors.password)}
             fullWidth
             helperText={formik.touched.password && formik.errors.password}
-            label="Mật khẩu"
+            label="Password"
             margin="normal"
             name="password"
             onBlur={formik.handleBlur}
@@ -89,6 +88,10 @@ const Login = () => {
             value={formik.values.password}
             variant="outlined"
           />
+          Not have account?{' '}
+          <Link className="link" to="/register">
+            Register now!
+          </Link>
           <Box sx={{ py: 2 }}>
             <LoadingButton
               color="primary"
@@ -99,7 +102,7 @@ const Login = () => {
               type="submit"
               loading={loading}
             >
-              Đăng nhập
+              Login
             </LoadingButton>
           </Box>
         </form>

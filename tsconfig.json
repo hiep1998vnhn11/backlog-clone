@@ -16,16 +16,21 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "typeRoots": ["node_modules/@types", "./resources/types/global.d.ts", "types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "./types/auto-imports.d.ts",
+      "types"
+    ],
     "paths": {
       "/@/*": ["./resources/js/*"],
-      "/#/*": ["./resources/types/*"]
-    }
+      "/#/*": ["./types/*"]
+    },
+    "types": ["vite/client"]
   },
   "include": [
     "./resources/js/**/*.ts",
-    "./resources/types/*.d.ts",
+    "./types/*.d.ts",
     "./resources/js/**/*.tsx"
   ],
-  "exclude": ["node_modules", "**/*.spec.ts", "**/*.d.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

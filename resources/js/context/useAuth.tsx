@@ -29,6 +29,7 @@ export function AuthProvider({
 }: {
   children: ReactNode
 }): JSX.Element {
+  const location = useLocation()
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(
     storage.get<User>('currentUser')
@@ -39,22 +40,23 @@ export function AuthProvider({
 
   useEffect(() => {
     if (error) setError(null)
-    if (location.pathname === '/login' && user) {
+    if (['/login', '/register'].includes(location.pathname)) {
+      if (!user) {
+        !initializing && setInitializing(true)
+        return
+      }
       navigate('/')
       !initializing && setInitializing(true)
       return
     }
-    if (location.pathname === '/login' && !user) {
-      !initializing && setInitializing(true)
-      return
-    }
+
     if (!user || !token.current) navigate('/login')
     !initializing && setInitializing(true)
   }, [location.pathname])
 
   const login = useCallback(async (username: string, password: string) => {
     const { access_token, user } = await loginApi({
-      username,
+      email: username,
       password,
     })
     setUser(user)

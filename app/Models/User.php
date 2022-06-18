@@ -5,31 +5,22 @@ namespace App\Models;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Permission\Traits\HasPermissions;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasPermissions;
-
+    use HasFactory, Notifiable;
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
+        'email',
         'name',
-        'address',
-        'note',
-        'username',
         'password',
-        'phone',
-        'status',
-        'cccd'
+        'avatar'
     ];
 
     /**
@@ -66,18 +57,13 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function agentOrders()
+    public function projects()
     {
-        return $this->hasMany('App\Models\Order', 'agent_id', 'id');
+        return $this->hasMany(Project::class);
     }
 
-    public function orders()
+    public function issues()
     {
-        return $this->hasMany('App\Models\Order', 'customer_id', 'id');
-    }
-
-    public function shareOrders()
-    {
-        return $this->hasMany('App\Models\Order', 'agent_share_id', 'id');
+        return $this->hasMany(Issue::class);
     }
 }

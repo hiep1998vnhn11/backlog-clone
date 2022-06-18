@@ -1,0 +1,47 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateIssuesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('issues', function (Blueprint $table) {
+            $table->id();
+            $table->string('subject', 255);
+            $table->string('key', 255)->unique();
+            $table->string('content', 1024)->nullable();
+            $table->foreignId('project_id')->nullable()
+                ->constrained('projects')->cascadeOnDelete();
+            $table->foreignId('assignee_id')->nullable()
+                ->constrained('users')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()
+                ->constrained('users')->nullOnDelete();
+            $table->foreignId('type_id')->nullable()
+                ->constrained('issue_types')->nullOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('issue_categories')->nullOnDelete();
+            $table->timestamp('due_date')->nullable();
+            $table->timestamp('estimate_time')->nullable();
+            $table->smallInteger('percent_complete')->default(0);
+            $table->string('status', 32)->default('open');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('issues');
+    }
+}

@@ -27,7 +27,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import SupportAgentIcon from '@mui/icons-material/SupportAgent'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import useApp from '/@/hooks/useApp'
+import useApp from '../../context/useApp'
 import { deleteAccount } from '/@/api/account'
 
 interface Props {

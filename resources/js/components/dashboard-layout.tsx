@@ -3,6 +3,7 @@ import { Box } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { DashboardNavbar } from './dashboard-navbar'
 import { DashboardSidebar } from './dashboard-sidebar'
+import { useLocation } from 'react-router-dom'
 
 const DashboardLayoutRoot: React.FC<any> = styled('div')(
   ({ theme, open }: any) => ({
@@ -19,14 +20,17 @@ const DashboardLayoutRoot: React.FC<any> = styled('div')(
 interface Props {
   children: React.ReactNode
 }
-export const DashboardLayout: React.FC<Props> = (props) => {
-  const { children } = props
+export const DashboardLayout: React.FC<Props> = ({ children }) => {
+  const location = useLocation()
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const toggleSidebar = useCallback(() => setSidebarOpen((value) => !value), [])
-
+  const hideSidebar = useMemo(
+    () => !location.pathname.startsWith('/projects/'),
+    [location.pathname]
+  )
   return (
     <>
-      <DashboardLayoutRoot open={isSidebarOpen}>
+      <DashboardLayoutRoot open={isSidebarOpen && !hideSidebar}>
         <Box
           sx={{
             display: 'flex',
@@ -41,11 +45,14 @@ export const DashboardLayout: React.FC<Props> = (props) => {
       <DashboardNavbar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
+        hideSidebar={hideSidebar}
       />
-      <DashboardSidebar
-        onClose={() => setSidebarOpen(false)}
-        open={isSidebarOpen}
-      />
+      {hideSidebar ? null : (
+        <DashboardSidebar
+          onClose={() => setSidebarOpen(false)}
+          open={isSidebarOpen}
+        />
+      )}
     </>
   )
 }

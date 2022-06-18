@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
-import useApp from '../hooks/useApp'
+import useApp from '../context/useApp'
 import { Avatar, Box } from '@mui/material'
 
 interface Props {

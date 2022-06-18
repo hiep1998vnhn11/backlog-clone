@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangeInfoRequest;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UploadAvatarRequest;
 use App\Http\Services\ImageService;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,7 +16,7 @@ class AuthController extends Controller
     private $imageService;
     public function __construct(ImageService $imageService)
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->imageService = $imageService;
     }
 
@@ -25,11 +27,27 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $credentials = request(['username', 'password']);
+        $credentials = request(['email', 'password']);
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         return $this->respondWithToken($token);
+    }
+
+    /**
+     * Register a new user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register(RegisterRequest $request)
+    {
+        User::create(
+            array_merge(
+                $request->validated(),
+                ['password' => Hash::make($request->password)]
+            )
+        );
+        return $this->sendRespondSuccess();
     }
 
     /**

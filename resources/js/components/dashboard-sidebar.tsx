@@ -21,7 +21,7 @@ import { Users as UsersIcon } from '../icons/users'
 import { XCircle as XCircleIcon } from '../icons/x-circle'
 import { Logo } from './logo'
 import { NavItem } from './nav-item'
-import useAuth from '../hooks/useAuth'
+import useAuth from '../context/useAuth'
 
 interface Props {
   open: boolean
@@ -37,75 +37,6 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
   })
   const items = useMemo(() => {
     if (!user) return []
-    const roles = user.all_roles
-    if (roles.includes('admin'))
-      return [
-        {
-          href: '/',
-          icon: <ChartBarIcon fontSize="small" />,
-          title: 'Dashboard',
-        },
-        {
-          href: '/orders',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Danh sách đơn hàng',
-        },
-        {
-          href: '/orders/drafts',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Đơn lưu kho',
-        },
-        {
-          href: '/orders/shippings',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Đơn chuyển',
-        },
-        {
-          href: '/orders/shares',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Share đơn',
-        },
-        {
-          href: '/accounts',
-          icon: <UsersIcon fontSize="small" />,
-          title: 'Quản lý tài khoản',
-        },
-      ]
-
-    if (roles.includes('agent'))
-      return [
-        {
-          href: '/',
-          icon: <ChartBarIcon fontSize="small" />,
-          title: 'Dashboard',
-        },
-        {
-          href: '/orders',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Danh sách đơn hàng',
-        },
-        {
-          href: '/orders/drafts',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Đơn lưu kho',
-        },
-        {
-          href: '/orders/shippings',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Đơn chuyển',
-        },
-        {
-          href: '/orders/shares',
-          icon: <ShoppingBagIcon fontSize="small" />,
-          title: 'Share đơn',
-        },
-        {
-          href: '/accounts',
-          icon: <UsersIcon fontSize="small" />,
-          title: 'Quản lý tài khoản',
-        },
-      ]
-
     return [
       {
         href: '/',
@@ -115,12 +46,27 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
       {
         href: '/orders',
         icon: <ShoppingBagIcon fontSize="small" />,
-        title: 'Đơn hàng của tôi',
+        title: 'Danh sách đơn hàng',
       },
       {
-        href: '/account',
+        href: '/orders/drafts',
+        icon: <ShoppingBagIcon fontSize="small" />,
+        title: 'Đơn lưu kho',
+      },
+      {
+        href: '/orders/shippings',
+        icon: <ShoppingBagIcon fontSize="small" />,
+        title: 'Đơn chuyển',
+      },
+      {
+        href: '/orders/shares',
+        icon: <ShoppingBagIcon fontSize="small" />,
+        title: 'Share đơn',
+      },
+      {
+        href: '/accounts',
         icon: <UsersIcon fontSize="small" />,
-        title: 'Tải khoản của tôi',
+        title: 'Quản lý tài khoản',
       },
     ]
   }, [user])

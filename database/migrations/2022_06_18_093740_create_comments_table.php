@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCustomerOrdersTable extends Migration
+class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,11 @@ class CreateCustomerOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('customer_orders', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->id();
+            $table->string('content', 1024);
+            $table->foreignId('issue_id')->constrained('issues')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('customer_name');
-            $table->string('customer_phone');
-            $table->string('customer_address');
-            $table->string('shop');
-            $table->string('url')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +29,6 @@ class CreateCustomerOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customer_orders');
+        Schema::dropIfExists('comments');
     }
 }

@@ -13,7 +13,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material'
-import useAuth from '/@/hooks/useAuth'
+import useAuth from '../context/useAuth'
 import Dropzone from '/@/components/Dropzone'
 import CloseIcon from '@mui/icons-material/Close'
 import { useCallback, useState } from 'react'

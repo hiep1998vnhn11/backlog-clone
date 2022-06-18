@@ -1,3 +1,4 @@
+$primary-color: #5048e5;
 ::-webkit-scrollbar {
   width: 7px;
   height: 8px;
@@ -32,10 +33,18 @@
     border-radius: 12px;
     border: solid 1px #e5e5e5;
     right: 0;
+    left: auto;
     top: 120%;
     background: #fff;
     padding: 20px;
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
+    &.left {
+      left: 0;
+      right: auto;
+      padding: 0;
+      color: #222;
+      border-radius: 6px;
+    }
     .name {
       font-weight: bold;
       font-size: 18px;
@@ -131,4 +140,32 @@
 
 .MuiTableCell-root {
   text-transform: none !important;
+}
+
+.project-search {
+  overflow: hidden;
+  width: 400px;
+  &-title {
+    background-color: $primary-color;
+    color: white;
+    font-weight: bold;
+    padding: 12px 20px;
+  }
+}
+
+.project-list {
+  overflow: auto;
+  max-height: 400px;
+  &-item {
+    border-bottom: solid 1px $primary-color;
+    word-wrap: break-word;
+    padding: 12px 20px;
+    &:hover {
+      background-color: #f7f69e;
+      cursor: pointer;
+    }
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 }

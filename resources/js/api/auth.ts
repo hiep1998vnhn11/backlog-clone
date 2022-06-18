@@ -15,7 +15,7 @@ enum Api {
   ChangeUserInfo = '/change-info',
   VerifyCode = '/auth/verify-code',
 }
-export function loginApi(params: { username: string; password: string }) {
+export function loginApi(params: { email: string; password: string }) {
   return defHttp.post<LoginResultModel>(
     {
       url: Api.Login,
@@ -26,14 +26,23 @@ export function loginApi(params: { username: string; password: string }) {
     }
   )
 }
+export const registerApi = (params: {
+  email: string
+  password: string
+  password_confirmation: string
+  name: string
+}) =>
+  defHttp.post(
+    { url: Api.Register, params },
+    {
+      withToken: false,
+    }
+  )
 
 export const logoutApi = () => defHttp.post({ url: Api.Logout })
 export const updateToken = () => defHttp.post({ url: Api.UpdateToken })
 export const updateUser = () => defHttp.put({ url: Api.UpdateUser })
 export const getUser = (data: any) => defHttp.post({ url: Api.Login, data })
-
-export const registerApi = (params: any) =>
-  defHttp.post({ url: Api.Register, params })
 
 export const changePasswordApi = (data: {
   old_password: string
