@@ -101,7 +101,7 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
           </Tooltip>
         )}
         <Button LinkComponent={Link} to="/">
-          Dashboard
+          Dashboards
         </Button>
         <div ref={projectDropdownRef} className="dropdown">
           <Button onClick={toggleProjectDropdown}>Project</Button>
@@ -135,7 +135,6 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
             </div>
           )}
         </div>
-        <Button>Projects</Button>
         <Box sx={{ flexGrow: 1 }} />
 
         <Tooltip title="Notifications">

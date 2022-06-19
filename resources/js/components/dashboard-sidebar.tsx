@@ -1,4 +1,3 @@
-import { useEffect, useMemo } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -9,16 +8,10 @@ import {
   useMediaQuery,
   Theme,
 } from '@mui/material'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import { ListAlt, Home, Equalizer, Add } from '@mui/icons-material'
 import { ChartBar as ChartBarIcon } from '../icons/chart-bar'
 import { Cog as CogIcon } from '../icons/cog'
-import { Lock as LockIcon } from '../icons/lock'
-import { Selector as SelectorIcon } from '../icons/selector'
-import { ShoppingBag as ShoppingBagIcon } from '../icons/shopping-bag'
 import { User as UserIcon } from '../icons/user'
-import { UserAdd as UserAddIcon } from '../icons/user-add'
-import { Users as UsersIcon } from '../icons/users'
-import { XCircle as XCircleIcon } from '../icons/x-circle'
 import { Logo } from './logo'
 import { NavItem } from './nav-item'
 import useAuth from '../context/useAuth'
@@ -30,6 +23,7 @@ interface Props {
 export const DashboardSidebar: React.FC<Props> = (props) => {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const params = useParams()
   const { open, onClose } = props
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'), {
     defaultMatches: true,
@@ -37,39 +31,42 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
   })
   const items = useMemo(() => {
     if (!user) return []
+    const pathSplit = params['*']?.split('/') || []
+    if (pathSplit.length < 2 || pathSplit[0] !== 'projects') return []
+    const projectKey = pathSplit[1]
     return [
       {
-        href: '/',
+        href: '/projects/' + projectKey,
+        icon: <Home />,
+        title: 'Home',
+      },
+      {
+        href: '/projects/' + projectKey + '/add',
+        icon: <Add fontSize="small" />,
+        title: 'Add issue',
+      },
+      {
+        href: '/projects/' + projectKey + '/issues',
+        icon: <ListAlt />,
+        title: 'Issues',
+      },
+      {
+        href: '/projects/' + projectKey + '/board',
+        icon: <Equalizer fontSize="small" />,
+        title: 'Board',
+      },
+      {
+        href: '/projects/' + projectKey + '/gantt-chart',
         icon: <ChartBarIcon fontSize="small" />,
-        title: 'Dashboard',
+        title: 'Gantt chart',
       },
       {
-        href: '/orders',
-        icon: <ShoppingBagIcon fontSize="small" />,
-        title: 'Danh sách đơn hàng',
-      },
-      {
-        href: '/orders/drafts',
-        icon: <ShoppingBagIcon fontSize="small" />,
-        title: 'Đơn lưu kho',
-      },
-      {
-        href: '/orders/shippings',
-        icon: <ShoppingBagIcon fontSize="small" />,
-        title: 'Đơn chuyển',
-      },
-      {
-        href: '/orders/shares',
-        icon: <ShoppingBagIcon fontSize="small" />,
-        title: 'Share đơn',
-      },
-      {
-        href: '/accounts',
-        icon: <UsersIcon fontSize="small" />,
-        title: 'Quản lý tài khoản',
+        href: '/projects/' + projectKey + '/setting',
+        icon: <CogIcon fontSize="small" />,
+        title: 'Project settings',
       },
     ]
-  }, [user])
+  }, [user, params])
 
   const content = (
     <Box
@@ -114,13 +111,13 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
       >
         <Button
           color="info"
-          startIcon={<CogIcon />}
+          startIcon={<UserIcon />}
           fullWidth
           sx={{ mt: 2 }}
           variant="contained"
           onClick={() => navigate('/account')}
         >
-          Tài khoản của tôi
+          My account
         </Button>
       </Box>
     </Box>

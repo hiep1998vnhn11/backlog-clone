@@ -169,3 +169,13 @@ $primary-color: #5048e5;
     }
   }
 }
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(247, 246, 158, 0.1);
+  }
+}

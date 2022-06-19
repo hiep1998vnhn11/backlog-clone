@@ -4,15 +4,13 @@ import { AppContextProvider } from './context/useApp'
 import IndexPage from './pages/index'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
-import OrderPage from './pages/orders'
-import CreateOrderPage from './pages/orders/create'
-import EditOrderPage from './pages/orders/edit'
-import ProductPage from './pages'
-import SettingPage from './pages/settings'
 import AccountPage from './pages/account'
-import AccountsPage from './pages/accounts'
-import ShowAccountsPage from './pages/accounts/show'
 import ProjectPage from './pages/projects'
+import ProjectAddIssuePage from './pages/projects/add'
+import ProjectBoardPage from './pages/projects/board'
+import ProjectGanttPage from './pages/projects/gantt'
+import ProjectIssuesPage from './pages/projects/issues'
+import ProjectSettingPage from './pages/projects/setting'
 
 import Page404 from './pages/404'
 
@@ -49,26 +47,27 @@ function App() {
                     <Routes>
                       <Route path="/" element={<IndexPage />} />
                       <Route path="/account" element={<AccountPage />} />
-                      <Route path="/orders" element={<OrderPage />} />
-                      <Route path="/orders/shares" element={<OrderPage />} />
-                      <Route path="/orders/drafts" element={<ProductPage />} />
-                      <Route
-                        path="/orders/shippings"
-                        element={<SettingPage />}
-                      />
-                      <Route
-                        path="/orders/create"
-                        element={<CreateOrderPage />}
-                      />
-                      <Route path="/orders/:id" element={<EditOrderPage />} />
-                      <Route path="/accounts" element={<AccountsPage />} />
-                      <Route
-                        path="/accounts/:id"
-                        element={<ShowAccountsPage />}
-                      />
                       <Route path="/projects/:key" element={<ProjectPage />} />
-                    </Routes>
-                    <Routes>
+                      <Route
+                        path="/projects/:key/add"
+                        element={<ProjectAddIssuePage />}
+                      />
+                      <Route
+                        path="/projects/:key/board"
+                        element={<ProjectBoardPage />}
+                      />
+                      <Route
+                        path="/projects/:key/issues"
+                        element={<ProjectIssuesPage />}
+                      />
+                      <Route
+                        path="/projects/:key/gantt-chart"
+                        element={<ProjectGanttPage />}
+                      />
+                      <Route
+                        path="/projects/:key/setting"
+                        element={<ProjectSettingPage />}
+                      />
                       <Route path="*" element={<Page404 />} />
                     </Routes>
                   </AuthGuard>

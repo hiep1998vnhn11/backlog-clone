@@ -1,6 +1,6 @@
 import { Box, Container, Typography } from '@mui/material'
-import { SettingsNotifications } from '../components/settings/settings-notifications'
-import { SettingsPassword } from '../components/settings/settings-password'
+import { SettingsNotifications } from '/@/components/settings/settings-notifications'
+import { SettingsPassword } from '/@/components/settings/settings-password'
 
 const Settings = () => (
   <Box

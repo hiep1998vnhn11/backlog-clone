@@ -3,6 +3,7 @@ import {
   Container,
   Grid,
   Pagination,
+  Skeleton,
   TextField,
   Typography,
 } from '@mui/material'
@@ -103,6 +104,13 @@ const IndexPage = () => {
     },
     []
   )
+
+  const onClickIssue = useCallback((projectKey: string) => {
+    console.log('issue Clicked', projectKey)
+  }, [])
+  const onClickCard = useCallback((projectKey: string) => {
+    console.log('issue onClickCard', projectKey)
+  }, [])
   return (
     <Box
       component="main"
@@ -115,11 +123,19 @@ const IndexPage = () => {
         <ProjectToolbar toggleOpen={toggleOpen} />
         <Box sx={{ pt: 3 }}>
           <Grid container spacing={3}>
-            {products.map((product) => (
-              <Grid item key={product.id} lg={4} md={6} xs={12}>
-                <ProjectCard product={product} />
-              </Grid>
-            ))}
+            {loadingList
+              ? [...Array(3)].map((_, i) => (
+                  <Grid item key={i} lg={4} md={6} xs={12}>
+                    <Skeleton variant="rectangular" width="100%">
+                      <div style={{ paddingTop: '57%' }} />
+                    </Skeleton>
+                  </Grid>
+                ))
+              : projects.map((project) => (
+                  <Grid item key={project.id} lg={4} md={6} xs={12}>
+                    <ProjectCard project={project} />
+                  </Grid>
+                ))}
           </Grid>
         </Box>
         <Box

@@ -12,6 +12,12 @@ export function formatMoney(value: any) {
   return result + ' vnđ'
 }
 
+export function getRelativeTime(value: string) {
+  const date = new Date(value).getTime()
+  const now = Date.now()
+  return difference(now, date)
+}
+
 export function difference(current: number, previous: number) {
   const msPerMinute = 60 * 1000
   const msPerHour = msPerMinute * 60
