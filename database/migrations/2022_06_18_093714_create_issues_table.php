@@ -16,8 +16,7 @@ class CreateIssuesTable extends Migration
         Schema::create('issues', function (Blueprint $table) {
             $table->id();
             $table->string('subject', 255);
-            $table->string('key', 255)->unique();
-            $table->string('content', 1024)->nullable();
+            $table->text('description', 1024)->nullable();
             $table->foreignId('project_id')->nullable()
                 ->constrained('projects')->cascadeOnDelete();
             $table->foreignId('assignee_id')->nullable()
@@ -28,9 +27,12 @@ class CreateIssuesTable extends Migration
                 ->constrained('issue_types')->nullOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('issue_categories')->nullOnDelete();
             $table->timestamp('due_date')->nullable();
-            $table->timestamp('estimate_time')->nullable();
+            $table->double('estimate_time', 20, 2)->default(0);
             $table->smallInteger('percent_complete')->default(0);
             $table->string('status', 32)->default('open');
+            $table->string('priority', 32)->default('normal');
+            $table->string('level', 32)->default('normal');
+            $table->string('tracker', 32)->default('feature');
             $table->timestamps();
         });
     }

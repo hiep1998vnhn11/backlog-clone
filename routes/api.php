@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\IssueController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Http\Request;
@@ -36,8 +38,10 @@ Route::group(
         Route::post('/upload-avatar', [AuthController::class, 'uploadAvatar']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::post('/change-info', [AuthController::class, 'changeInfo']);
-
+        Route::get('/project/{projectKey}/memberAndCategory', [ProjectController::class, 'memberAndCategory']);
         Route::resource('/project', ProjectController::class);
+        Route::resource('/category', CategoryController::class);
+        Route::resource('/issue', IssueController::class);
     }
 );
 

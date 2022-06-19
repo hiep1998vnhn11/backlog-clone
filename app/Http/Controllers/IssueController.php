@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Project\CreateCategoryRequest;
-use App\Http\Requests\Project\CreateProjectRequest;
+use App\Http\Requests\Issue\CreateIssueRequest;
+use App\Models\Issue;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
-class ProjectController extends Controller
+class IssueController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +16,10 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        return $this->sendRespondSuccess(auth()->user()->projects()->paginate($request->limit ?? 12));
+        if (!$request->project_key) return $this->sendRespondError();
+        $project = Project::where('key', $request->project_key)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        return $this->sendRespondSuccess($project->issues()->paginate($project->limit ?? 10));
     }
 
     /**
@@ -25,14 +28,22 @@ class ProjectController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateProjectRequest $request)
+    public function store(CreateIssueRequest $request)
     {
-        Project::create(
+        $project = Project::where('key', $request->project_key)
+            ->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+
+        $issue = Issue::create(
             array_merge($request->validated(), [
                 'user_id' => auth()->id(),
+                'project_id' => $project->id,
+                'estimate_time' => $request->estimate_time ?? 0,
+                'percent_complete' => $request->percent_complete ?? 0,
             ])
         );
-        return $this->sendRespondSuccess($request->key);
+
+        return $this->sendRespondSuccess($issue->id);
     }
 
     /**
@@ -42,6 +53,17 @@ class ProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
     {
         //
     }
@@ -67,24 +89,5 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function memberAndCategory(string $projectKey)
-    {
-        $project = Project::where('key', $projectKey)->firstOrFail();
-        $members = $project->getAllMembers();
-        $categories = $project->issueCategories()->select('name as label', 'id as value')->get();
-        return $this->sendRespondSuccess(
-            [
-                'members' => $members,
-                'categories' => $categories,
-            ]
-        );
-    }
-    public function storeCategory(string $projectKey, CreateCategoryRequest $request)
-    {
-        $project = Project::where('key', $projectKey)->firstOrFail();
-        $project->issueCategories()->create($request->validated());
-        return $this->sendRespondSuccess($request->key);
     }
 }

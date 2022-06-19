@@ -4,7 +4,7 @@ namespace App\Http\Requests\Project;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateProjectRequest extends FormRequest
+class CreateCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,7 @@ class CreateProjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'key' => 'required|string|max:255|unique:projects,key',
+            'project_key' => 'required|string',
             'description' => 'nullable|string'
         ];
     }

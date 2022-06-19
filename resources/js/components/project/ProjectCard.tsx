@@ -9,7 +9,6 @@ import {
   Typography,
 } from '@mui/material'
 import { Clock as ClockIcon } from '../../icons/clock'
-import { Cog as CogIcon } from '../../icons/cog'
 import { Project } from '/@/api/models/projectModel'
 import { getRelativeTime } from '/@/utils/format'
 import { Link } from 'react-router-dom'
@@ -21,38 +20,14 @@ const ProjectCard: React.FC<Props> = ({ project, ...rest }) => (
   <Link to={'/projects/' + project.key} className="link">
     <Card className="project-card" {...rest}>
       <CardContent>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            pb: 3,
-          }}
-        >
-          <div
-            style={{
-              border: 'solid 1px rgba(0,0,0,0.1)',
-              borderRadius: '50%',
-              padding: '10px',
-              width: '60px',
-              height: '60px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <CogIcon />
-          </div>
-        </Box>
-        <Typography
-          align="center"
-          color="textPrimary"
-          gutterBottom
-          variant="h5"
-        >
+        <Typography color="textPrimary" gutterBottom variant="h5">
           {project.name}
         </Typography>
-        <Typography align="center" color="textPrimary" variant="body1">
+        <Typography color="textPrimary" variant="body1">
           {project.key}
+        </Typography>
+        <Typography color="textPrimary" variant="body2">
+          {project.description}
         </Typography>
       </CardContent>
       <Box sx={{ flexGrow: 1 }} />
@@ -75,17 +50,6 @@ const ProjectCard: React.FC<Props> = ({ project, ...rest }) => (
             >
               Updated {getRelativeTime(project.updated_at)}
             </Typography>
-          </Grid>
-          <Grid
-            item
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-            }}
-          >
-            <Button color="info" variant="contained">
-              Issues
-            </Button>
           </Grid>
         </Grid>
       </Box>

@@ -32,6 +32,7 @@ interface Props {
 }
 
 const OrderListToolbar: React.FC<Props> = (props) => {
+  const params = useParams()
   const {
     handleChangeSearchKey,
     handleChangeSearchShop,
@@ -44,7 +45,6 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     fromDate,
     toDate,
   } = props
-  const [value, setValue] = useState<Date | null>(null)
   return (
     <Box {...props}>
       <Box
@@ -57,26 +57,20 @@ const OrderListToolbar: React.FC<Props> = (props) => {
         }}
       >
         <Typography sx={{ m: 1 }} variant="h4">
-          Danh sách đơn hàng
+          Issues
         </Typography>
         <Box sx={{ m: 1 }}>
-          <Button startIcon={<UploadIcon fontSize="small" />} sx={{ mr: 1 }}>
-            Nhập file
-          </Button>
-          <Button startIcon={<DownloadIcon fontSize="small" />} sx={{ mr: 1 }}>
-            Xuất file
-          </Button>
           <Button
             LinkComponent={Link}
             color="primary"
             variant="contained"
-            to="/orders/create"
+            to={`/projects/${params.key}/add`}
           >
-            Thêm đơn hàng
+            New Issue
           </Button>
         </Box>
       </Box>
-      <Box sx={{ mt: 3 }}>
+      {/* <Box sx={{ mt: 3 }}>
         <Card>
           <CardContent>
             <Grid container spacing={1}>
@@ -160,7 +154,7 @@ const OrderListToolbar: React.FC<Props> = (props) => {
             </Grid>
           </CardContent>
         </Card>
-      </Box>
+      </Box> */}
     </Box>
   )
 }

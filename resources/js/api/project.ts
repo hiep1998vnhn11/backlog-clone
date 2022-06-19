@@ -6,15 +6,22 @@ const indexApi = '/project'
 interface CreateOrderData {
   name: string
   key: string
+  description?: string | null
 }
 
 export const getProjects = (params: any) =>
   defHttp.get<{
     data: Project[]
     total: number
+    last_page: number
   }>({
     url: indexApi,
     params,
+  })
+
+export const getMemberAndCategory = (projectKey: string) =>
+  defHttp.get({
+    url: indexApi + '/' + projectKey + '/memberAndCategory',
   })
 
 export const createProject = (data: CreateOrderData) =>

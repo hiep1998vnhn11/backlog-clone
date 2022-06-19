@@ -1,9 +1,7 @@
-import { Bar } from 'react-chartjs-2'
 import {
   Box,
   Button,
   Card,
-  CardContent,
   CardHeader,
   Divider,
   Table,
@@ -11,12 +9,10 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  useTheme,
 } from '@mui/material'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 
-export const Sales: React.FC<any> = (props) => {
+const IssueTracking: React.FC<any> = (props) => {
   const row = {}
   return (
     <Card {...props}>
@@ -36,15 +32,17 @@ export const Sales: React.FC<any> = (props) => {
               <TableCell align="center">Total</TableCell>
             </TableRow>
           </TableHead>
-          <TableRow
-            key={row.name}
-            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-          >
-            <TableCell align="left">{row.calories}</TableCell>
-            <TableCell align="center">{row.fat}</TableCell>
-            <TableCell align="center">{row.carbs}</TableCell>
-            <TableCell align="center">{row.protein}</TableCell>
-          </TableRow>
+          <TableBody>
+            <TableRow
+              key={row.name}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell align="left">{row.calories}</TableCell>
+              <TableCell align="center">{row.fat}</TableCell>
+              <TableCell align="center">{row.carbs}</TableCell>
+              <TableCell align="center">{row.protein}</TableCell>
+            </TableRow>
+          </TableBody>
         </Table>
       </Box>
       <Divider />
@@ -52,6 +50,7 @@ export const Sales: React.FC<any> = (props) => {
         sx={{
           display: 'flex',
           justifyContent: 'flex-end',
+          p: 1,
         }}
       >
         <Button
@@ -59,9 +58,17 @@ export const Sales: React.FC<any> = (props) => {
           endIcon={<ArrowRightIcon fontSize="small" />}
           size="small"
         >
-          Overview
+          Gantt chart
+        </Button>
+        <Button
+          color="primary"
+          endIcon={<ArrowRightIcon fontSize="small" />}
+          size="small"
+        >
+          View all issues
         </Button>
       </Box>
     </Card>
   )
 }
+export default IssueTracking

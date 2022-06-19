@@ -12,6 +12,7 @@ class IssueCategory extends Model
     protected $fillable = [
         'name',
         'project_id',
+        'description',
     ];
 
     public function project()

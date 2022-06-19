@@ -16,6 +16,7 @@ class CreateIssueCategoriesTable extends Migration
         Schema::create('issue_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 128);
+            $table->text('description')->nullable();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->timestamps();
         });

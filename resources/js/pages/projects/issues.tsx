@@ -1,7 +1,7 @@
 import { Box, Container } from '@mui/material'
-import OrderListResult from '/@/components/order/OrderListResult'
+import IssueList from '/@/components/project/IssueList'
 import OrderListToolbar from '/@/components/order/OrderListToolbar'
-import { getOrders } from '../../api/order'
+import { getIssues } from '../../api/issue'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '/@/hooks/common'
 import useApp from '../../context/useApp'
@@ -9,6 +9,7 @@ import { OrderModel } from '/@/api/models/orderModel'
 
 const OrderPage = () => {
   const { toastError, toastSuccess } = useApp()
+  const params = useParams()
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(1)
   const [searchKey, setSearchKey] = useState('')
@@ -18,14 +19,14 @@ const OrderPage = () => {
   const [toDate, setToDate] = useState<Date | null>(null)
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc')
   const [sortField, setSortField] = useState('created_at')
-  const [orders, setOrders] = useState<OrderModel[]>([])
+  const [issues, setIssues] = useState<OrderModel[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
   const isMounted = useRef(false)
   const fetchOrder = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await getOrders({
+      const response = await getIssues({
         limit,
         page,
         search_key: searchKey,
@@ -35,15 +36,16 @@ const OrderPage = () => {
         shipper: searchShipper,
         from_date: fromDate?.toISOString().split('T')[0],
         to_date: toDate?.toISOString().split('T')[0],
+        project_key: params.key!,
       })
       if (isMounted.current) {
-        setOrders(response.data)
+        setIssues(response.data)
         setTotal(response.total)
       }
     } catch (err) {
       console.warn(err)
       if (isMounted.current) {
-        setOrders([])
+        setIssues([])
         setTotal(0)
       }
     } finally {
@@ -135,8 +137,8 @@ const OrderPage = () => {
           handleChangeToDate={handleChangeToDate}
         />
         <Box sx={{ mt: 3 }}>
-          <OrderListResult
-            orders={orders}
+          <IssueList
+            issues={issues}
             loading={loading}
             page={page - 1}
             limit={limit}

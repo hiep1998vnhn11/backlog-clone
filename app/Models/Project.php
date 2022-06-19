@@ -13,6 +13,7 @@ class Project extends Model
         'name',
         'key',
         'user_id',
+        'description'
     ];
 
     public function user()
@@ -38,5 +39,28 @@ class Project extends Model
     public function members()
     {
         return $this->hasMany(Member::class);
+    }
+
+    public function getAllMembers()
+    {
+        $members = $this->members()
+            ->select('users.id as value', 'users.name as label')
+            ->join('users', 'users.id', '=', 'members.user_id')
+            ->get();
+        $owner = User::select('id as value', 'name as label')
+            ->where('id', $this->user_id)
+            ->first();
+        $members->push($owner);
+        return $members;
+    }
+
+    public function hasPermissionCreateIssue($userId)
+    {
+        if ($this->user_id === $userId) return true;
+        $member = $this->members()
+            ->where('user_id', $userId)
+            ->first();
+        if ($member) return true;
+        return false;
     }
 }

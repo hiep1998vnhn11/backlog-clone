@@ -11,7 +11,6 @@ class Issue extends Model
 
     protected $fillable = [
         'subject',
-        'key',
         'project_id',
         'user_id',
         'status',
@@ -21,7 +20,10 @@ class Issue extends Model
         'due_date',
         'estimate_time',
         'percent_complete',
-        'note',
+        'description',
+        'priority',
+        'level',
+        'tracker',
     ];
 
     public function project()

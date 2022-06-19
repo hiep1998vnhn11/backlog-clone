@@ -2,148 +2,154 @@ import {
   Box,
   Container,
   Grid,
-  Icon,
   Typography,
   Card,
   CardContent,
-  CardHeader,
   TextField,
   Autocomplete,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  SelectChangeEvent,
+  InputAdornment,
 } from '@mui/material'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useCallback, useMemo, useState } from 'react'
-import { ArrowBack } from '@mui/icons-material'
-import useAuth from '../../context/useAuth'
-import * as Yup from 'yup'
-import useApp from '../../context/useApp'
-import { phoneRegExp } from '/@/enums/regex'
-import { LoadingButton } from '@mui/lab'
-import { createOrder } from '../../api/order'
-import { useFormik } from 'formik'
-import {
-  useAgentAndShipper,
-  LabelOption,
-} from '/@/hooks/order/useAgentAndShipper'
+import { CKEditor } from 'ckeditor4-react'
+import useApp from '/@/context/useApp'
+import { DatePicker, LoadingButton } from '@mui/lab'
+import { useMemberAndCategory, OptionItem } from './useMemberAndCategory'
+import useAuth from '/@/context/useAuth'
+import { createIssue } from '/@/api/issue'
+import {} from '/@/utils/format'
+import React from 'react'
 
-const CreateOrder = () => {
+const AddIssue = () => {
   const { toastError, toastSuccess } = useApp()
+  const { user } = useAuth()
   const navigate = useNavigate()
+  const params = useParams()
   const [loading, setLoading] = useState(false)
-  const [agent, setAgent] = useState<LabelOption | null>(null)
-  const [shipper, setShipper] = useState<LabelOption | null>(null)
-  const [agentShare, setAgentShare] = useState<LabelOption | null>(null)
-  const [note, setNote] = useState('')
-  const [orderCode, setOrderCode] = useState('')
-  const [shop, setShop] = useState('')
-  const [shopError, setShopError] = useState('')
-  const [agentError, setAgentError] = useState('')
   const {
-    shipperOptions,
-    agentOptions,
-    loading: loadingOption,
-  } = useAgentAndShipper()
-
-  const formik = useFormik({
-    initialValues: {
-      note: '',
-      customer_name: '',
-      customer_phone: '',
-      customer_address: '',
-      customer_note: '',
+    members,
+    categories,
+    loading: loadingMember,
+  } = useMemberAndCategory(params.key!)
+  const [description, setDescription] = useState('')
+  const onDescriptionChange = useCallback((event: any) => {
+    setDescription(event.editor.getData())
+  }, [])
+  const [errorSubject, setErrorSubject] = useState(false)
+  const [tracker, setTracker] = useState('Bug')
+  const [subject, setSubject] = useState('')
+  const [startDate, setStartDate] = useState<Date | null>(new Date())
+  const [dueDate, setDueDate] = useState<Date | null>(null)
+  const [estimateTime, setEstimateTime] = useState('')
+  const [priority, setPriority] = useState('Normal')
+  const [assignee, setAssignee] = useState<OptionItem | null>(null)
+  const [category, setCategory] = useState<OptionItem | null>(null)
+  const [percentComplete, setPercentComplete] = useState('')
+  const [level, setLevel] = useState('Normal')
+  const isAssignMe = useMemo(() => {
+    if (!assignee) return false
+    return assignee.value === user!.id
+  }, [assignee, user])
+  const handleChangeTracker = useCallback((e: SelectChangeEvent) => {
+    setTracker(e.target.value)
+  }, [])
+  const handleChangeLevel = useCallback((e: SelectChangeEvent) => {
+    setLevel(e.target.value)
+  }, [])
+  const handleChangePriority = useCallback((e: SelectChangeEvent) => {
+    setPriority(e.target.value)
+  }, [])
+  const handleChangeSubject = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSubject(e.target.value)
     },
-    validationSchema: Yup.object({
-      customer_phone: Yup.string()
-        .max(12, 'Số điện thoại không hợp lệ')
-        .min(10, 'Số điện thoại không hợp lệ')
-        .matches(phoneRegExp, 'Số điện thoại không hợp lệ')
-        .required('Hãy nhập số điện thoại của bạn'),
-      customer_name: Yup.string()
-        .required('Hãy nhập tên khách hàng')
-        .max(255, 'Tên khách hàng không hợp lệ, tối đa 255 ký tự'),
-      customer_address: Yup.string()
-        .max(255, 'Địa chỉ không hợp lệ, tối đa 255 ký tự')
-        .required('Hãy nhập địa chỉ khách hàng'),
-    }),
-    onSubmit: async () => {
-      if (!agent) return setAgentError('Hãy chọn Agent tiếp nhận đơn hàng!')
+    []
+  )
+  const handleChangeEstimateTime = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEstimateTime(e.target.value)
+    },
+    []
+  )
+  const handleChangePercentComplete = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = +e.target.value
+      if (value > 100) setPercentComplete('100')
+      else if (+value < 0) setPercentComplete(0 - value + '')
+      else setPercentComplete(value + '')
+    },
+    []
+  )
+  const handleChangeStartDate = useCallback((date: Date | null) => {
+    setStartDate(date)
+  }, [])
+  const handleChangeDueDate = useCallback((date: Date | null) => {
+    setDueDate(date)
+  }, [])
+  const handleAssigneeChange = useCallback(
+    (_: any, value: OptionItem | null) => {
+      setAssignee(value)
+    },
+    []
+  )
+  const handleCategoryChange = useCallback(
+    (_: any, value: OptionItem | null) => {
+      setCategory(value)
+    },
+    []
+  )
+
+  const handleAssignMe = useCallback(() => {
+    const member = members.find((m) => m.value === user!.id)
+    setAssignee(member || null)
+  }, [members, user])
+
+  const handleCreateIssue = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (!subject) {
+        setErrorSubject(true)
+        return
+      }
       try {
         setLoading(true)
-        await createOrder({
-          ...formik.values,
-          code: orderCode,
-          shop,
-          agent: agent.value,
-          shipper: shipper?.value,
-          agent_share: agentShare?.value,
+        const id = await createIssue({
+          tracker,
+          subject,
+          description,
+          start_date: startDate?.toISOString().split('T')[0],
+          due_date: dueDate?.toISOString().split('T')[0],
+          priority,
+          level,
+          percent_complete: percentComplete ? +percentComplete : null,
+          estimate_time: estimateTime ? +estimateTime : null,
+          assignee_id: assignee?.value,
+          category_id: category?.value,
+          project_key: params.key!,
         })
-        formik.handleReset({})
-        toastSuccess('Tạo đơn hàng thành công!')
-        navigate('/orders')
-      } catch (err: any) {
-        toastError(
-          'Tạo đơn hàng thất bại! Hãy điền các thông tin còn thiếu để tiếp tục tạo mới'
-        )
-        const errors = err.data.errors as Record<string, string[]>
-        Object.entries(errors).forEach(([key, value]) => {
-          if (key === 'shop') {
-            setShopError(value[0])
-          }
-        })
-        formik.setErrors(err.data.errors)
+        console.log(id)
+      } catch (error) {
       } finally {
         setLoading(false)
       }
     },
-  })
-
-  const handleNoteChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setNote(e.target.value),
-    []
+    [
+      subject,
+      description,
+      startDate,
+      dueDate,
+      estimateTime,
+      priority,
+      level,
+      percentComplete,
+      assignee,
+      category,
+    ]
   )
-  const handleOrderCodeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setOrderCode(e.target.value),
-    []
-  )
-  const handleShopChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setShop(e.target.value),
-    []
-  )
-  const handleAgentChange = useCallback(
-    (_: React.SyntheticEvent, value: any) => {
-      if (!value) setAgentError('Hãy chọn Agent tiếp nhận đơn hàng!')
-      else setAgentError('')
-      setAgent(value)
-    },
-    []
-  )
-  const handleAgentShareChange = useCallback(
-    (_: React.SyntheticEvent, value: any) => {
-      setAgentShare(value)
-    },
-    []
-  )
-  const handleShipperChange = useCallback(
-    (_: React.SyntheticEvent, value: any) => {
-      setShipper(value)
-    },
-    []
-  )
-  const handleShopBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      if (e.target.value === '') {
-        setShopError('Hãy nhập tên cửa hàng')
-      }
-    },
-    []
-  )
-  const isError = useMemo(() => {
-    return (
-      Boolean(shopError) ||
-      Boolean(agentError) ||
-      Object.keys(formik.errors).length > 0
-    )
-  }, [formik.errors, shopError])
-
   return (
     <Box
       component="main"
@@ -152,17 +158,16 @@ const CreateOrder = () => {
         py: 2,
       }}
     >
-      <form autoComplete="off" noValidate onSubmit={formik.handleSubmit}>
+      <form autoComplete="off" noValidate onSubmit={handleCreateIssue}>
         <Container maxWidth={false}>
           <div className="flex justify-between">
             <Typography sx={{ mb: 3 }} variant="h5">
-              Add issue
+              New issue
             </Typography>
             <div>
               <LoadingButton
                 color="primary"
                 variant="contained"
-                disabled={isError}
                 loading={loading}
                 type="submit"
               >
@@ -171,85 +176,162 @@ const CreateOrder = () => {
             </div>
           </div>
           <Card sx={{ mb: 2 }}>
-            <CardHeader
-              title="Thông tin người nhận"
-              sx={{
-                p: 2,
-              }}
-            />
             <CardContent>
               <Grid container spacing={3}>
-                <Grid item md={6} xs={12}>
-                  <TextField
-                    error={Boolean(
-                      formik.touched.customer_name &&
-                        formik.errors.customer_name
-                    )}
-                    helperText={
-                      formik.touched.customer_name &&
-                      formik.errors.customer_name
-                    }
-                    fullWidth
-                    label="Họ tên người nhận"
-                    name="customer_name"
-                    required
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.customer_name}
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item md={6} xs={12}>
-                  <TextField
-                    error={Boolean(
-                      formik.touched.customer_phone &&
-                        formik.errors.customer_phone
-                    )}
-                    helperText={
-                      formik.touched.customer_phone &&
-                      formik.errors.customer_phone
-                    }
-                    fullWidth
-                    label="Số điện thoại"
-                    name="customer_phone"
-                    required
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.customer_phone}
-                    variant="outlined"
-                  />
-                </Grid>
                 <Grid item md={12} xs={12}>
-                  <TextField
-                    error={Boolean(
-                      formik.touched.customer_address &&
-                        formik.errors.customer_address
-                    )}
-                    helperText={
-                      formik.touched.customer_address &&
-                      formik.errors.customer_address
-                    }
-                    fullWidth
-                    label="Địa chỉ người nhận"
-                    name="customer_address"
-                    required
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.customer_address}
-                    variant="outlined"
-                  />
+                  <FormControl sx={{ width: 300 }} size="small">
+                    <InputLabel>Tracker</InputLabel>
+                    <Select
+                      size="small"
+                      input={<OutlinedInput label="Tracker" />}
+                      value={tracker}
+                      onChange={handleChangeTracker}
+                    >
+                      <MenuItem value="Bug">Bug</MenuItem>
+                      <MenuItem value="Feature">Feature</MenuItem>
+                      <MenuItem value="Support">Support</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item md={12} xs={12}>
                   <TextField
                     fullWidth
-                    label="Ghi chú của người nhận (nếu có)"
-                    name="customer_note"
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.customer_note}
+                    label="Subject"
+                    name="subject"
+                    required
+                    onChange={handleChangeSubject}
+                    value={subject}
                     variant="outlined"
-                    rows={4}
-                    multiline
+                    error={errorSubject}
+                    onBlur={() => setErrorSubject(!subject)}
+                    helperText={errorSubject ? 'The Subject is required' : ''}
+                  />
+                </Grid>
+                <Grid item md={12} xs={12}>
+                  Description:
+                  <CKEditor
+                    initData=""
+                    onChange={onDescriptionChange}
+                    config={{ language: 'en' }}
+                  />
+                </Grid>
+
+                <Grid item md={6} xs={12}>
+                  <FormControl sx={{ width: 300 }} size="small">
+                    <InputLabel>Priority</InputLabel>
+                    <Select
+                      size="small"
+                      input={<OutlinedInput label="Priority" />}
+                      value={priority}
+                      onChange={handleChangePriority}
+                    >
+                      <MenuItem value="Low">Low</MenuItem>
+                      <MenuItem value="Normal">Normal</MenuItem>
+                      <MenuItem value="Hight">Hight</MenuItem>
+                      <MenuItem value="Urgent">Urgent</MenuItem>
+                      <MenuItem value="Immediate">Immediate</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <DatePicker
+                    label="Start date"
+                    value={startDate}
+                    onChange={handleChangeStartDate}
+                    renderInput={(params: any) => (
+                      <TextField {...params} size="small" />
+                    )}
+                  />
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <FormControl sx={{ width: 300 }} size="small">
+                    <InputLabel>Level</InputLabel>
+                    <Select
+                      size="small"
+                      input={<OutlinedInput label="Level" />}
+                      value={level}
+                      onChange={handleChangeLevel}
+                    >
+                      <MenuItem value="Easy">Easy</MenuItem>
+                      <MenuItem value="Normal">Normal</MenuItem>
+                      <MenuItem value="Hard">Hard</MenuItem>
+                      <MenuItem value="Extremely Hard">Extremely Hard</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <DatePicker
+                    label="Due date"
+                    value={dueDate}
+                    onChange={handleChangeDueDate}
+                    renderInput={(params: any) => (
+                      <TextField {...params} size="small" />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item md={6} xs={12}>
+                  <Autocomplete
+                    disablePortal
+                    id="assignee"
+                    size="small"
+                    options={members}
+                    value={assignee}
+                    onChange={handleAssigneeChange}
+                    sx={{ width: 300 }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Assignee" />
+                    )}
+                  />
+                  {isAssignMe ? null : (
+                    <a className="link" onClick={handleAssignMe}>
+                      Assign to me
+                    </a>
+                  )}
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TextField
+                    sx={{ width: '240px' }}
+                    size="small"
+                    value={estimateTime}
+                    type="number"
+                    label="Estimate time"
+                    onChange={handleChangeEstimateTime}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">hours</InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+
+                <Grid item md={6} xs={12}>
+                  <Autocomplete
+                    disablePortal
+                    id="category"
+                    size="small"
+                    options={categories}
+                    value={category}
+                    onChange={handleCategoryChange}
+                    sx={{ width: 300 }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Category" />
+                    )}
+                  />
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TextField
+                    sx={{ width: '240px' }}
+                    size="small"
+                    value={percentComplete}
+                    onChange={handleChangePercentComplete}
+                    type="number"
+                    label="% done"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">%</InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -259,15 +341,14 @@ const CreateOrder = () => {
           <LoadingButton
             color="primary"
             variant="contained"
-            disabled={isError}
             loading={loading}
             type="submit"
           >
-            Lưu
+            Add
           </LoadingButton>
         </Container>
       </form>
     </Box>
   )
 }
-export default CreateOrder
+export default AddIssue

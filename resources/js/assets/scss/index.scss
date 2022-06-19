@@ -104,6 +104,7 @@ $primary-color: #5048e5;
 .link {
   color: #2196f3;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .flex {
@@ -178,4 +179,13 @@ $primary-color: #5048e5;
   &:hover {
     background-color: rgba(247, 246, 158, 0.1);
   }
+}
+
+.chip-Bug {
+  background-color: #e5123d;
+  color: #fff;
+  padding: 0 6px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-decoration: none;
 }

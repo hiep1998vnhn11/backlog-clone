@@ -29,6 +29,7 @@ const IndexPage = () => {
     initialValues: {
       name: '',
       key: '',
+      description: '',
     },
     validationSchema: Yup.object({
       name: Yup.string().max(255).required('Project name is required!'),
@@ -46,6 +47,9 @@ const IndexPage = () => {
         await createProject(formik.values)
         toastSuccess('Project created successfully!')
         toggleOpen()
+        formik.resetForm()
+        changeKeyRef.current = false
+        fetchProjects()
       } catch (err: any) {
         formik.setErrors(err.data.errors)
       } finally {
@@ -55,7 +59,7 @@ const IndexPage = () => {
   })
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
+  const [totalPage, setTotalPage] = useState(1)
   const [searchKey, setSearchKey] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
   const isMounted = useRef(false)
@@ -67,9 +71,10 @@ const IndexPage = () => {
         page,
         searchKey,
       })
+      await new Promise((resolve) => setTimeout(resolve, 500))
       if (isMounted.current) {
-        setTotal(data.total)
         setProjects(data.data)
+        setTotalPage(data.last_page)
       }
     } catch (error: any) {
       console.warn(error)
@@ -105,12 +110,10 @@ const IndexPage = () => {
     []
   )
 
-  const onClickIssue = useCallback((projectKey: string) => {
-    console.log('issue Clicked', projectKey)
+  const handleChangePagination = useCallback((_: any, page: number) => {
+    setPage(page)
   }, [])
-  const onClickCard = useCallback((projectKey: string) => {
-    console.log('issue onClickCard', projectKey)
-  }, [])
+
   return (
     <Box
       component="main"
@@ -121,18 +124,18 @@ const IndexPage = () => {
     >
       <Container maxWidth={false}>
         <ProjectToolbar toggleOpen={toggleOpen} />
-        <Box sx={{ pt: 3 }}>
+        <Box sx={{ pt: 3, minHeight: 300 }}>
           <Grid container spacing={3}>
             {loadingList
-              ? [...Array(3)].map((_, i) => (
-                  <Grid item key={i} lg={4} md={6} xs={12}>
+              ? [...Array(4)].map((_, i) => (
+                  <Grid item key={i} lg={3} md={6} xs={12}>
                     <Skeleton variant="rectangular" width="100%">
                       <div style={{ paddingTop: '57%' }} />
                     </Skeleton>
                   </Grid>
                 ))
               : projects.map((project) => (
-                  <Grid item key={project.id} lg={4} md={6} xs={12}>
+                  <Grid item key={project.id} lg={3} md={6} xs={12}>
                     <ProjectCard project={project} />
                   </Grid>
                 ))}
@@ -145,7 +148,13 @@ const IndexPage = () => {
             pt: 3,
           }}
         >
-          <Pagination color="primary" count={3} size="small" />
+          <Pagination
+            page={page}
+            color="primary"
+            count={totalPage}
+            size="small"
+            onChange={handleChangePagination}
+          />
         </Box>
       </Container>
 
@@ -157,7 +166,7 @@ const IndexPage = () => {
         loading={loading}
         confirmText="Create"
       >
-        <Box sx={{ width: '600px', maxWidth: '100%' }}>
+        <Box sx={{ width: '800px', maxWidth: '100%' }}>
           <TextField
             fullWidth
             required
@@ -183,7 +192,6 @@ const IndexPage = () => {
             name="key"
             onBlur={formik.handleBlur}
             onChange={handleChangeProjectKey}
-            type="key"
             value={formik.values.key}
             size="small"
             variant="outlined"
@@ -194,6 +202,20 @@ const IndexPage = () => {
             (e.g. Project name Backlog has project key BLG_2) Uppercase letters
             (A-Z), numbers (0-9) and underscore (_) can be used.
           </Typography>
+
+          <TextField
+            fullWidth
+            label="Project description"
+            margin="normal"
+            name="description"
+            onBlur={formik.handleBlur}
+            onChange={handleChangeProjectKey}
+            value={formik.values.description}
+            size="small"
+            variant="outlined"
+            multiline
+            rows={8}
+          />
         </Box>
       </Dialog>
     </Box>
