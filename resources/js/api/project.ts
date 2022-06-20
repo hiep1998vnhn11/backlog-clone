@@ -50,3 +50,16 @@ export const deleteOrder = (id: number) =>
   defHttp.delete({
     url: indexApi + '/' + id,
   })
+
+export const projectPluck = (search_key: string) =>
+  defHttp.get<
+    {
+      name: string
+      key: string
+    }[]
+  >({
+    url: '/project/pluck',
+    params: {
+      search_key,
+    },
+  })

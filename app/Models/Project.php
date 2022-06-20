@@ -43,15 +43,10 @@ class Project extends Model
 
     public function getAllMembers()
     {
-        $members = $this->members()
+        return $this->members()
             ->select('users.id as value', 'users.name as label')
             ->join('users', 'users.id', '=', 'members.user_id')
             ->get();
-        $owner = User::select('id as value', 'name as label')
-            ->where('id', $this->user_id)
-            ->first();
-        $members->push($owner);
-        return $members;
     }
 
     public function hasPermissionCreateIssue($userId)

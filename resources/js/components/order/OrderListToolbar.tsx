@@ -8,6 +8,8 @@ import {
   SvgIcon,
   Typography,
   Grid,
+  Autocomplete,
+  Chip,
 } from '@mui/material'
 import { Search as SearchIcon } from '../../icons/search'
 import { Upload as UploadIcon } from '../../icons/upload'
@@ -15,36 +17,63 @@ import { Download as DownloadIcon } from '../../icons/download'
 import { useState } from 'react'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Link } from 'react-router-dom'
+import {
+  useMemberAndCategory,
+  OptionItem,
+} from '/@/pages/projects/useMemberAndCategory'
 
 interface Props {
   handleChangeSearchKey: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleChangeSearchShop: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleChangeSearchShipper: (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => void
-  handleChangeFromDate: (date: Date | null) => void
-  handleChangeToDate: (date: Date | null) => void
+  handleCategoryChange: (value: string) => void
+  handleAssigneeChange: (value: string) => void
+  setStatus: (value: string) => void
   searchKey: string
-  searchShop: string
-  searchShipper: string
-  fromDate: Date | null
-  toDate: Date | null
+  projectKey: string
+  status: string
 }
 
+const issueStatus = [
+  'All',
+  'Open',
+  'In progress',
+  'Resolved',
+  'Closed',
+  'Not closed',
+]
 const OrderListToolbar: React.FC<Props> = (props) => {
   const params = useParams()
+  const [assigneeSelected, setAssigneeSelected] = useState<OptionItem | null>(
+    null
+  )
+  const [categorySelected, setCategorySelected] = useState<OptionItem | null>(
+    null
+  )
+  const { members, categories } = useMemberAndCategory(props.projectKey)
   const {
     handleChangeSearchKey,
-    handleChangeSearchShop,
-    handleChangeSearchShipper,
-    handleChangeFromDate,
-    handleChangeToDate,
+    handleCategoryChange,
+    handleAssigneeChange,
     searchKey,
-    searchShop,
-    searchShipper,
-    fromDate,
-    toDate,
+    status,
+    setStatus,
   } = props
+
+  const handleSelectedAssigneeChange = useCallback(
+    (_: any, value: OptionItem | null) => {
+      handleAssigneeChange(value ? value.value + '' : '')
+      setAssigneeSelected(value)
+    },
+    []
+  )
+  const handleSelectedCategoryChange = useCallback(
+    (_: any, value: OptionItem | null) => {
+      handleCategoryChange(value ? value.value + '' : '')
+      setCategorySelected(value)
+    },
+    []
+  )
+  const handleClick = useCallback(() => {}, [])
+
   return (
     <Box {...props}>
       <Box
@@ -70,11 +99,24 @@ const OrderListToolbar: React.FC<Props> = (props) => {
           </Button>
         </Box>
       </Box>
-      {/* <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 3 }}>
         <Card>
           <CardContent>
+            <div className="flex items-center mb-2 gap-2">
+              Status:
+              {issueStatus.map((item) => (
+                <Chip
+                  className="ml-2"
+                  label={item}
+                  key={item}
+                  variant="outlined"
+                  onClick={() => setStatus(item)}
+                  color={status === item ? 'primary' : 'default'}
+                />
+              ))}
+            </div>
             <Grid container spacing={1}>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   size="small"
                   fullWidth
@@ -89,72 +131,42 @@ const OrderListToolbar: React.FC<Props> = (props) => {
                       </InputAdornment>
                     ),
                   }}
-                  placeholder="Tên, địa chỉ, số điện thoại, ..."
+                  placeholder="Search key"
                   variant="outlined"
                 />
               </Grid>
-              <Grid item xs={3}>
-                <TextField
+              <Grid item md={2} xs={6}>
+                <Autocomplete
+                  disablePortal
+                  id="assignee"
                   size="small"
+                  options={members}
+                  value={assigneeSelected}
+                  onChange={handleSelectedAssigneeChange}
                   fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SvgIcon color="action" fontSize="small">
-                          <SearchIcon />
-                        </SvgIcon>
-                      </InputAdornment>
-                    ),
-                  }}
-                  value={searchShop}
-                  onChange={handleChangeSearchShop}
-                  placeholder="Shop"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SvgIcon color="action" fontSize="small">
-                          <SearchIcon />
-                        </SvgIcon>
-                      </InputAdornment>
-                    ),
-                  }}
-                  value={searchShipper}
-                  onChange={handleChangeSearchShipper}
-                  placeholder="Shipper"
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <DatePicker
-                  label="Ngày tạo từ"
-                  value={fromDate}
-                  onChange={handleChangeFromDate}
-                  renderInput={(params: any) => (
-                    <TextField {...params} fullWidth size="small" />
+                  renderInput={(params) => (
+                    <TextField {...params} label="Assignee" />
                   )}
                 />
               </Grid>
-              <Grid item xs={2}>
-                <DatePicker
-                  label="Ngày tạo đến"
-                  value={toDate}
-                  onChange={handleChangeToDate}
-                  renderInput={(params: any) => (
-                    <TextField {...params} fullWidth size="small" />
+              <Grid item md={2} xs={6}>
+                <Autocomplete
+                  disablePortal
+                  id="category"
+                  size="small"
+                  options={categories}
+                  value={categorySelected}
+                  onChange={handleSelectedCategoryChange}
+                  fullWidth
+                  renderInput={(params) => (
+                    <TextField {...params} label="Category" />
                   )}
                 />
               </Grid>
             </Grid>
           </CardContent>
         </Card>
-      </Box> */}
+      </Box>
     </Box>
   )
 }

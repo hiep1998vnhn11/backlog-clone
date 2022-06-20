@@ -12,15 +12,17 @@ import {
   TextField,
   InputAdornment,
   SvgIcon,
+  CircularProgress,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { Bell as BellIcon } from '../icons/bell'
 import { UserCircle as UserCircleIcon } from '../icons/user-circle'
-import { useEventListener } from '/@/hooks/common'
+import { useDebounce, useEventListener } from '/@/hooks/common'
 import useAuth from '../context/useAuth'
 import { Cog as CogIcon } from '../icons/cog'
 import { Search as SearchIcon } from '../icons/search'
+import { projectPluck } from '/@/api/project'
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }: { theme: Theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -36,6 +38,13 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [searchProject, setSearchProject] = useState('')
+  const [projects, setProjects] = useState<
+    {
+      name: string
+      key: string
+    }[]
+  >([])
+  const [loading, setLoading] = useState(true)
   const handleChangeSearchProject = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchProject(e.target.value)
@@ -49,11 +58,30 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
   //project dropdown
   const projectDropdownRef = useRef<HTMLDivElement | null>(null)
   const [projectDropdown, setProjectDropdown] = useState(false)
+
+  const { toggleSidebar, isSidebarOpen, hideSidebar, ...other } = props
+
+  const handleSearchProject = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await projectPluck(searchProject)
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setProjects(response)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [searchProject])
+  useDebounce(handleSearchProject, 350, [searchProject])
   const toggleProjectDropdown = useCallback(
-    () => setProjectDropdown((value) => !value),
+    () =>
+      setProjectDropdown((value) => {
+        if (!value) handleSearchProject()
+        return !value
+      }),
     []
   )
-  const { toggleSidebar, isSidebarOpen, hideSidebar, ...other } = props
   useEventListener('click', (event) => {
     const target = event.target as HTMLElement
     ;(() => {
@@ -126,11 +154,21 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
                 variant="outlined"
               />
               <ul className="project-list">
-                {[...Array(100)].map((_, i) => (
-                  <li key={i} className="project-list-item">
-                    BackLog
+                {loading ? (
+                  <li className="flex justify-center p-2">
+                    <CircularProgress />
                   </li>
-                ))}
+                ) : (
+                  projects.map((project) => (
+                    <li
+                      key={project.key}
+                      className="project-list-item"
+                      onClick={() => navigate(`/projects/${project.key}`)}
+                    >
+                      {project.name}
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           )}
@@ -170,7 +208,7 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
                 color="info"
                 startIcon={<CogIcon />}
               >
-                Tài khoản của tôi
+                My account
               </Button>
               <div className="divider" />
               <Button
@@ -180,7 +218,7 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
                 onClick={logout}
                 startIcon={<LogoutIcon />}
               >
-                Đăng xuất
+                Logout
               </Button>
             </div>
           )}

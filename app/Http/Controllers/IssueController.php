@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Issue\CreateIssueRequest;
+use App\Http\Requests\Issue\UpdateIssueRequest;
 use App\Models\Issue;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -19,7 +20,54 @@ class IssueController extends Controller
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
         if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
-        return $this->sendRespondSuccess($project->issues()->paginate($project->limit ?? 10));
+        $sortBy = $request->sort_by ?? 'updated_at';
+        $sortType = $request->sort_type ?? 'desc';
+        $searchKey = $request->search_key ?? '';
+        $assignee = $request->assignee ?? '';
+        $category = $request->category ?? '';
+        $status = $request->status ?? '';
+        $limit = $request->limit ?? 10;
+        if (!in_array($status, [
+            'All', 'In progress', 'Resolved', 'Closed', 'Not closed',
+            'Open',
+        ])) $status = 'All';
+        if (!in_array($sortBy, [
+            'updated_at', 'created_at', 'priority',
+            'estimate_time', 'percent_complete', 'assignee_name',
+            'category_name', 'tracker', 'subject'
+        ])) $sortBy = 'updated_at';
+        if (!in_array($sortType, ['asc', 'desc'])) $sortType = 'desc';
+        $query = $project->issues()
+            ->select(
+                'issues.*',
+                'assignee.name as assignee_name',
+                'issue_categories.name as category_name',
+            )
+            ->leftJoin('users as assignee', 'issues.assignee_id', '=', 'assignee.id')
+            ->leftJoin('issue_categories', 'issues.category_id', '=', 'issue_categories.id')
+            ->when($searchKey, function ($q, $searchKey) {
+                $q->where('issues.subject', 'like', "%{$searchKey}%");
+            })
+            ->when($assignee, function ($q, $assignee) {
+                $q->where('issues.assignee_id', $assignee);
+            })
+            ->when($category, function ($q, $category) {
+                $q->where('issues.category_id', $category);
+            })
+            ->when($status, function ($q, $status) {
+                if ($status !== 'All') {
+                    if ($status === 'Not closed') {
+                        $q->where('issues.status', '!=', 'Closed');
+                    } else {
+                        $q->where('issues.status', $status);
+                    }
+                }
+            })
+            ->orderBy($sortBy, $sortType)
+            ->paginate($limit);
+        return $this->sendRespondSuccess(
+            $query
+        );
     }
 
     /**
@@ -52,20 +100,19 @@ class IssueController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Issue $issue, Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        if (!$request->project_key) return $this->sendRespondError();
+        $project = Project::where('key', $request->project_key)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if ($project->id !== $issue->project_id) return $this->sendForbidden();
+        $issue->load([
+            'comments',
+            'assignee',
+            'category',
+            'user'
+        ]);
+        return $this->sendRespondSuccess($issue);
     }
 
     /**
@@ -75,9 +122,11 @@ class IssueController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateIssueRequest $request, Issue $issue)
     {
-        //
+        if (!$issue->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        $issue->update($request->validated());
+        return $this->sendRespondSuccess();
     }
 
     /**

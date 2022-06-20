@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Requests\Project\CreateCategoryRequest;
+use App\Http\Requests\Project\UpdateCategoryRequest as ProjectUpdateCategoryRequest;
 use App\Models\IssueCategory;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -75,9 +77,20 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProjectUpdateCategoryRequest $request, IssueCategory $category)
     {
-        //
+        if (!$category->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        $checkCategory = $category->project->issueCategories()
+            ->where('name', $request->name)
+            ->where('id', '!=', $category->id)
+            ->first();
+        if ($checkCategory) return $this->sendUnvalidated([
+            'name' => ['Category name already exists in this project! Please add other name.']
+        ]);
+        $category->update(
+            $request->validated()
+        );
+        return $this->sendRespondSuccess();
     }
 
     /**

@@ -40,7 +40,7 @@ export function difference(current: number, previous: number) {
   }
 }
 export function formatDate(value: string | null, seperator = '/') {
-  if (!value) return '---'
+  if (!value) return '-'
   const date = new Date(value)
   const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
   const month =
@@ -51,8 +51,8 @@ export function formatDate(value: string | null, seperator = '/') {
     date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
   return `${day}${seperator}${month}${seperator}${year} ${hour}:${minute}`
 }
-export function formatDateOnly(value: string, seperator = '/') {
-  if (!value) return '---'
+export function formatDateOnly(value: string | null, seperator = '/') {
+  if (!value) return '-'
   const date = new Date(value)
   const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
   const month =
@@ -62,7 +62,7 @@ export function formatDateOnly(value: string, seperator = '/') {
 }
 
 export function formatDateOnlyHour(value: string, seperator = ':') {
-  if (!value) return '---'
+  if (!value) return '-'
   const date = new Date(value)
   const hour = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
   const minute =
@@ -71,7 +71,7 @@ export function formatDateOnlyHour(value: string, seperator = ':') {
 }
 
 export function formatDateToDate(value: string) {
-  if (!value) return '---'
+  if (!value) return '-'
   const date = value.split('-')
   return `${date[2]}/${date[1]}/${date[0]}`
 }

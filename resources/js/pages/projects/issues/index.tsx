@@ -1,25 +1,21 @@
 import { Box, Container } from '@mui/material'
 import IssueList from '/@/components/project/IssueList'
 import OrderListToolbar from '/@/components/order/OrderListToolbar'
-import { getIssues } from '../../api/issue'
+import { getIssues, Issue } from '/@/api/issue'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '/@/hooks/common'
-import useApp from '../../context/useApp'
-import { OrderModel } from '/@/api/models/orderModel'
 
 const OrderPage = () => {
-  const { toastError, toastSuccess } = useApp()
   const params = useParams()
   const [limit, setLimit] = useState(10)
   const [page, setPage] = useState(1)
   const [searchKey, setSearchKey] = useState('')
-  const [searchShop, setSearchShop] = useState('')
-  const [searchShipper, setSearchShipper] = useState('')
-  const [fromDate, setFromDate] = useState<Date | null>(null)
-  const [toDate, setToDate] = useState<Date | null>(null)
+  const [category, setCategory] = useState('')
+  const [assignee, setAssignee] = useState('')
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc')
-  const [sortField, setSortField] = useState('created_at')
-  const [issues, setIssues] = useState<OrderModel[]>([])
+  const [sortField, setSortField] = useState('updated_at')
+  const [status, setStatus] = useState('All')
+  const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
   const isMounted = useRef(false)
@@ -32,11 +28,10 @@ const OrderPage = () => {
         search_key: searchKey,
         sort_by: sortField,
         sort_type: sortDirection,
-        shop: searchShop,
-        shipper: searchShipper,
-        from_date: fromDate?.toISOString().split('T')[0],
-        to_date: toDate?.toISOString().split('T')[0],
         project_key: params.key!,
+        assignee,
+        category,
+        status,
       })
       if (isMounted.current) {
         setIssues(response.data)
@@ -57,10 +52,9 @@ const OrderPage = () => {
     searchKey,
     sortDirection,
     sortField,
-    searchShipper,
-    searchShop,
-    fromDate,
-    toDate,
+    category,
+    assignee,
+    status,
   ])
 
   const handleSort = useCallback(
@@ -75,44 +69,25 @@ const OrderPage = () => {
     [sortField, sortDirection]
   )
 
-  useDebounce(() => fetchOrder(), 350, [
-    searchKey,
-    searchShop,
-    searchShipper,
-    fromDate,
-    toDate,
-  ])
+  useDebounce(() => fetchOrder(), 350, [searchKey])
   useEffect(() => {
     isMounted.current = true
     fetchOrder()
     return () => {
       isMounted.current = false
     }
-  }, [page, limit, sortDirection, sortField])
-
+  }, [page, limit, sortDirection, sortField, category, assignee, status])
   const handleChangeSearchKey = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchKey(e.target.value)
     },
     []
   )
-  const handleChangeSearchShop = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchShop(e.target.value)
-    },
-    []
-  )
-  const handleChangeSearchShipper = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchShipper(e.target.value)
-    },
-    []
-  )
-  const handleChangeFromDate = useCallback((date: Date | null) => {
-    setFromDate(date)
+  const handleCategoryChange = useCallback((value: string) => {
+    setCategory(value)
   }, [])
-  const handleChangeToDate = useCallback((date: Date | null) => {
-    setToDate(date)
+  const handleAssigneeChange = useCallback((value: string) => {
+    setAssignee(value)
   }, [])
 
   return (
@@ -126,15 +101,12 @@ const OrderPage = () => {
       <Container maxWidth={false}>
         <OrderListToolbar
           searchKey={searchKey}
-          searchShipper={searchShipper}
-          searchShop={searchShop}
-          fromDate={fromDate}
-          toDate={toDate}
+          handleCategoryChange={handleCategoryChange}
+          handleAssigneeChange={handleAssigneeChange}
           handleChangeSearchKey={handleChangeSearchKey}
-          handleChangeSearchShipper={handleChangeSearchShipper}
-          handleChangeSearchShop={handleChangeSearchShop}
-          handleChangeFromDate={handleChangeFromDate}
-          handleChangeToDate={handleChangeToDate}
+          projectKey={params.key!}
+          status={status}
+          setStatus={setStatus}
         />
         <Box sx={{ mt: 3 }}>
           <IssueList
@@ -145,6 +117,10 @@ const OrderPage = () => {
             onPageChange={setPage}
             onLimitChange={setLimit}
             total={total}
+            projectKey={params.key!}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
         </Box>
       </Container>

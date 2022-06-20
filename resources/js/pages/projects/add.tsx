@@ -131,7 +131,7 @@ const AddIssue = () => {
           category_id: category?.value,
           project_key: params.key!,
         })
-        console.log(id)
+        navigate('/projects/' + params.key! + '/issues/' + id)
       } catch (error) {
       } finally {
         setLoading(false)

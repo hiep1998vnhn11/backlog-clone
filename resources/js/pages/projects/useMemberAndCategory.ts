@@ -1,12 +1,18 @@
+import { Issue, getIssue } from '/@/api/issue'
 import { getMemberAndCategory } from '/@/api/project'
 export interface OptionItem {
   value: number
   label: string
 }
-export function useMemberAndCategory(projectKey: string) {
+export function useMemberAndCategory(
+  projectKey: string,
+  issueId?: number | string
+) {
   const [members, setMembers] = useState<OptionItem[]>([])
   const [categories, setCategories] = useState<OptionItem[]>([])
+  const [issue, setIssue] = useState<Issue | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingIssue, setLoadingIssue] = useState(true)
   const isMounted = useRef(false)
 
   const fetchData = useCallback(async () => {
@@ -19,6 +25,7 @@ export function useMemberAndCategory(projectKey: string) {
       if (isMounted.current) {
         setMembers(response.members)
         setCategories(response.categories)
+        issueId && fetchIssue()
       }
     } catch (error: any) {
       console.log(error)
@@ -26,6 +33,18 @@ export function useMemberAndCategory(projectKey: string) {
       setLoading(false)
     }
   }, [])
+
+  const fetchIssue = useCallback(async () => {
+    try {
+      const response = await getIssue(issueId!, projectKey)
+      setIssue(response)
+    } catch (error: any) {
+      console.log(error)
+    } finally {
+      setTimeout(() => (isMounted.current ? setLoadingIssue(false) : null), 250)
+    }
+  }, [])
+
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true
@@ -41,5 +60,7 @@ export function useMemberAndCategory(projectKey: string) {
     members,
     categories,
     loading,
+    issue,
+    loadingIssue,
   }
 }

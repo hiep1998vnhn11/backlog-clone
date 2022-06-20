@@ -11,6 +11,7 @@ import {
   TableBody,
   TextField,
   IconButton,
+  Chip,
 } from '@mui/material'
 import Dialog from '/@/components/Dialog'
 import {
@@ -18,7 +19,9 @@ import {
   Category,
   getCategories,
   deleteCategory,
+  updateCategory,
 } from '/@/api/category'
+import { getMembers, Member, deleteMember, createMember } from '/@/api/member'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { formatDateOnly } from '/@/utils/format'
@@ -66,17 +69,19 @@ const Settings = () => {
   const dialogState = useRef({
     type: 'category',
     title: 'New Category',
+    id: 0,
   })
   const params = useParams()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingCategory, setLoadingCategory] = useState(false)
   const toggleOpen = useCallback(() => setOpen((value) => !value), [])
-  const [tab, setTab] = useState(2)
+  const [tab, setTab] = useState(1)
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState('')
   const [description, setDescription] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
+  const [members, setMembers] = useState<Member[]>([])
   const isMounted = useRef(false)
   useEffect(() => {
     if (!isMounted.current) {
@@ -112,12 +117,24 @@ const Settings = () => {
       setLoadingCategory(false)
     }
   }, [])
+  const fetchMember = useCallback(async () => {
+    try {
+      setLoadingCategory(true)
+      const response = await getMembers(params.key!)
+      if (isMounted.current) setMembers(response)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoadingCategory(false)
+    }
+  }, [])
   const handleChangeTab = useCallback(
     (_: any, newValue: number) => {
       if (newValue === 2 && !categories.length) fetchCategory()
+      else if (newValue === 1 && !members.length) fetchMember()
       setTab(newValue)
     },
-    [categories]
+    [categories, members]
   )
 
   const handleCreateCategory = useCallback(async () => {
@@ -132,6 +149,45 @@ const Settings = () => {
       setDescription('')
       toggleOpen()
       fetchCategory()
+      toastSuccess('Category has been created successfully')
+    } catch (error: any) {
+      setNameError(error.data.errors.name?.[0])
+    } finally {
+      setLoading(false)
+    }
+  }, [name, description, params.key])
+  const handleCreateInviteMember = useCallback(async () => {
+    try {
+      setLoading(true)
+      await createMember({
+        email: name,
+        project_key: params.key!,
+      })
+      setName('')
+      toggleOpen()
+      fetchMember()
+      toastSuccess('Invite sent successfully')
+    } catch (error: any) {
+      const errors = error.data.errors
+      setNameError(
+        errors ? errors.email?.[0] : 'Not found member with this email!'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [name, params.key])
+  const handleUpdateCategory = useCallback(async () => {
+    try {
+      setLoading(true)
+      await updateCategory(dialogState.current.id, {
+        name,
+        description,
+      })
+      setName('')
+      setDescription('')
+      toggleOpen()
+      fetchCategory()
+      toastSuccess('Updated category successfully')
     } catch (error: any) {
       setNameError(error.data.errors.name?.[0])
     } finally {
@@ -157,6 +213,77 @@ const Settings = () => {
       },
     })
   }, [])
+  const onMemberDelete = useCallback((id: number) => {
+    createConfirmModal({
+      title: 'Are you sure you want to delete this member?',
+      content: 'You can not undo this action.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmDestructive: true,
+      onConfirm: async () => {
+        try {
+          await deleteMember(id)
+          toastSuccess('Member deleted successfully.')
+          setMembers((value) => value.filter((item) => item.id !== id))
+        } catch (error) {
+          console.log(error)
+          toastError('Failed to delete member.')
+        }
+      },
+    })
+  }, [])
+  const handleConfirmDialog = useCallback(() => {
+    if (dialogState.current.type === 'category') {
+      if (dialogState.current.id) return handleUpdateCategory()
+      return handleCreateCategory()
+    }
+    return handleCreateInviteMember()
+  }, [handleCreateCategory, handleUpdateCategory])
+  const onEditCategory = useCallback((category: Category) => {
+    dialogState.current.title = 'Category: ' + category.name
+    dialogState.current.id = category.id
+    dialogState.current.type = 'category'
+    setName(category.name)
+    setDescription(category.description)
+    toggleOpen()
+  }, [])
+  const handleClickAddCategory = useCallback(() => {
+    dialogState.current.title = 'New Category'
+    dialogState.current.id = 0
+    dialogState.current.type = 'category'
+    setName('')
+    setDescription('')
+    toggleOpen()
+  }, [])
+  const handleClickInviteMember = useCallback(() => {
+    dialogState.current.title = 'Invite Member'
+    dialogState.current.id = 0
+    dialogState.current.type = 'invite'
+    setName('')
+    toggleOpen()
+  }, [])
+  const primaryButtonMarkup = () => {
+    if (tab === 2)
+      return (
+        <Button
+          variant="contained"
+          size="small"
+          onClick={handleClickAddCategory}
+        >
+          Add Category
+        </Button>
+      )
+    if (tab === 1)
+      return (
+        <Button
+          variant="contained"
+          size="small"
+          onClick={handleClickInviteMember}
+        >
+          Invite member
+        </Button>
+      )
+  }
   return (
     <Box component="main" sx={{ p: 2 }}>
       <Typography variant="h4">Project settings</Typography>
@@ -178,20 +305,57 @@ const Settings = () => {
             <Tab label="Member" {...a11yProps(1)} />
             <Tab label="Categories" {...a11yProps(2)} />
           </Tabs>
-          <div>
-            <Button variant="contained" size="small" onClick={toggleOpen}>
-              Add Category
-            </Button>
-          </div>
+          <div>{primaryButtonMarkup()}</div>
         </Box>
         <TabPanel value={tab} index={0}>
           <Button>Add Category</Button>
         </TabPanel>
         <TabPanel value={tab} index={1}>
-          Item Two
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Joined on</TableCell>
+                <TableCell align="right">Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loadingCategory ? (
+                <tr>
+                  <td colSpan={4}>Loading</td>
+                </tr>
+              ) : (
+                members.map((member) => (
+                  <StyledTableRow key={member.id}>
+                    <TableCell>{member.name}</TableCell>
+                    <TableCell>{member.email}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={member.status}
+                        color={
+                          member.status === 'joined' ? 'success' : 'default'
+                        }
+                      ></Chip>
+                    </TableCell>
+                    <TableCell>{formatDateOnly(member.joined_at)}</TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        color="error"
+                        onClick={() => onMemberDelete(member.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </StyledTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </TabPanel>
         <TabPanel value={tab} index={2}>
-          <Table aria-label="simple table" size="small">
+          <Table aria-label="simple table">
             <TableHead>
               <TableRow>
                 <TableCell>Category</TableCell>
@@ -212,7 +376,10 @@ const Settings = () => {
                     <TableCell>{category.description}</TableCell>
                     <TableCell>{formatDateOnly(category.created_at)}</TableCell>
                     <TableCell align="right">
-                      <IconButton color="success">
+                      <IconButton
+                        color="success"
+                        onClick={() => onEditCategory(category)}
+                      >
                         <EditIcon />
                       </IconButton>
                       <IconButton
@@ -235,15 +402,21 @@ const Settings = () => {
         onClose={toggleOpen}
         title={dialogState.current.title}
         cancelText="Cancel"
-        confirmText="Save"
-        onConfirm={handleCreateCategory}
+        confirmText={
+          dialogState.current.type === 'category' ? 'Save' : 'Invite'
+        }
+        onConfirm={handleConfirmDialog}
         loading={loading}
       >
         <Box sx={{ width: '600px' }}>
           <TextField
             fullWidth
             required
-            label="Category name"
+            label={
+              dialogState.current.type === 'category'
+                ? 'Category name'
+                : 'Email'
+            }
             margin="normal"
             name="name"
             onChange={handleNameChange}
@@ -253,25 +426,29 @@ const Settings = () => {
             error={!!nameError}
             helperText={nameError}
           />
-          <Typography variant="body2" sx={{ color: '#666' }}>
-            Name of category; generally it set to issue.
-            <br />
-            category can be defined in each project.
-            <br />
-            e.g. "Subsystem A", "Research", "Design", and so on.
-          </Typography>
-          <TextField
-            fullWidth
-            label="Category description"
-            margin="normal"
-            name="description"
-            onChange={handleDescriptionChange}
-            value={description}
-            size="small"
-            variant="outlined"
-            multiline
-            rows={4}
-          />
+          {dialogState.current.type === 'category' && (
+            <>
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                Name of category; generally it set to issue.
+                <br />
+                category can be defined in each project.
+                <br />
+                e.g. "Subsystem A", "Research", "Design", and so on.
+              </Typography>
+              <TextField
+                fullWidth
+                label="Category description"
+                margin="normal"
+                name="description"
+                onChange={handleDescriptionChange}
+                value={description}
+                size="small"
+                variant="outlined"
+                multiline
+                rows={4}
+              />
+            </>
+          )}
         </Box>
       </Dialog>
     </Box>

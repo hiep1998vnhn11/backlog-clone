@@ -27,7 +27,9 @@ class CreateIssuesTable extends Migration
                 ->constrained('issue_types')->nullOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('issue_categories')->nullOnDelete();
             $table->timestamp('due_date')->nullable();
+            $table->timestamp('start_date')->nullable();
             $table->double('estimate_time', 20, 2)->default(0);
+            $table->double('spent_time', 20, 2)->default(0);
             $table->smallInteger('percent_complete')->default(0);
             $table->string('status', 32)->default('open');
             $table->string('priority', 32)->default('normal');

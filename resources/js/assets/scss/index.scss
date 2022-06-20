@@ -124,6 +124,9 @@ $primary-color: #5048e5;
   &.items-stretch {
     align-items: stretch;
   }
+  &.gap-2 {
+    gap: 1rem;
+  }
 }
 
 .order-status-option {
@@ -188,4 +191,27 @@ $primary-color: #5048e5;
   font-weight: 600;
   border-radius: 4px;
   text-decoration: none;
+}
+
+.p-2 {
+  padding: 1rem;
+}
+
+.ml-2 {
+  margin-left: 1rem;
+}
+.mt-2 {
+  margin-top: 1rem;
+}
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-gap: 1rem;
+  grid-auto-rows: minmax(auto, auto);
+  &.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

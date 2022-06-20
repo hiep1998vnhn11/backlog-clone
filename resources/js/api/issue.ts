@@ -13,6 +13,7 @@ export interface Issue {
   description: null | string
   due_date: null | string
   estimate_time: number
+  spent_time: number
   id: number
   level: string
   percent_complete: number
@@ -23,9 +24,38 @@ export interface Issue {
   tracker: string
   updated_at: string
   user_id: number
+  start_date: string | null
+  assignee_name?: null | string
+  category_name?: null | string
+  user?: {
+    name: string
+  }
+  category?: {
+    name: string
+  }
+  assignee?: {
+    name: string
+  }
+  comments?: {
+    id: number
+  }[]
 }
 interface CreateIssueData {
   project_key: string
+  subject: string
+  tracker: string
+  description: string
+  priority: string
+  category_id?: number | null
+  assignee_id?: number | null
+  level: string
+  start_date?: string | null
+  due_date?: string | null
+  percent_complete: number | null
+  estimate_time: number | null
+}
+
+interface UpdateIssueData {
   subject: string
   tracker: string
   description: string
@@ -55,8 +85,13 @@ export const createIssue = (data: CreateIssueData) =>
     data,
   })
 
-export const getCategory = (id: string) =>
-  defHttp.get<CategoryModel>({ url: `${indexApi}/${id}` })
+export const getIssue = (id: string | number, projectKey: string) =>
+  defHttp.get<Issue>({
+    url: `${indexApi}/${id}`,
+    params: {
+      project_key: projectKey,
+    },
+  })
 
 export const activeCategory = (params: { id: number; isActive?: boolean }) =>
   defHttp.post({
@@ -64,10 +99,10 @@ export const activeCategory = (params: { id: number; isActive?: boolean }) =>
     params,
   })
 
-export const updateCategory = (id: number, params: CreateCategoryParam) =>
+export const updateIssue = (id: number, data: UpdateIssueData) =>
   defHttp.put<CategoryModel>({
     url: indexApi + '/' + id,
-    params,
+    data,
   })
 
 export const deleteCategory = (id: number, _u?: string) =>

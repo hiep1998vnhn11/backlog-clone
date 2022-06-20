@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\CreateCategoryRequest;
 use App\Http\Requests\Project\CreateProjectRequest;
+use App\Models\Member;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class ProjectController extends Controller
 {
@@ -16,7 +18,18 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        return $this->sendRespondSuccess(auth()->user()->projects()->paginate($request->limit ?? 12));
+        $query = Project::query()
+            ->select('projects.*')
+            ->leftJoin('members', 'projects.id', '=', 'members.project_id')
+            ->where('projects.user_id', auth()->id())
+            ->orWhere(function ($q) {
+                $q->where('members.user_id', auth()->id())
+                    ->where('members.status', Member::STATUS_INVITED);
+            })
+            ->paginate($request->limit ?? 12);
+        return $this->sendRespondSuccess(
+            $query
+        );
     }
 
     /**
@@ -27,11 +40,17 @@ class ProjectController extends Controller
      */
     public function store(CreateProjectRequest $request)
     {
-        Project::create(
+        $project = Project::create(
             array_merge($request->validated(), [
                 'user_id' => auth()->id(),
             ])
         );
+        Member::create([
+            'user_id' => auth()->id(),
+            'project_id' => $project->id,
+            'status' => Member::STATUS_JOINED,
+            'joined_at' => now(),
+        ]);
         return $this->sendRespondSuccess($request->key);
     }
 
@@ -67,6 +86,26 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function pluck(Request $request)
+    {
+        $params = $request->all();
+        $searchKey = Arr::get($params, 'search_key', null);
+        $projects = Project::select('projects.name', 'projects.key')
+            ->leftJoin('members', 'members.project_id', '=', 'projects.id')
+            ->where(function ($q) {
+                $q->where('projects.user_id', auth()->id())
+                    ->orWhere(function ($q2) {
+                        $q2->where('members.user_id', auth()->id())
+                            ->where('members.status', Member::STATUS_INVITED);
+                    });
+            })
+            ->when($searchKey, function ($q, $searchKey) {
+                $q->where('name', 'like', '%' . $searchKey . '%')
+                    ->orWhere('key', 'like', '%' . $searchKey . '%');
+            });
+        return $this->sendRespondSuccess($projects->limit(12)->get());
     }
 
     public function memberAndCategory(string $projectKey)

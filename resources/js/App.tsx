@@ -10,6 +10,8 @@ import ProjectAddIssuePage from './pages/projects/add'
 import ProjectBoardPage from './pages/projects/board'
 import ProjectGanttPage from './pages/projects/gantt'
 import ProjectIssuesPage from './pages/projects/issues'
+import ProjectIssuePage from './pages/projects/issues/id'
+import ProjectIssueEditPage from './pages/projects/issues/edit'
 import ProjectSettingPage from './pages/projects/setting'
 
 import Page404 from './pages/404'
@@ -67,6 +69,14 @@ function App() {
                       <Route
                         path="/projects/:key/setting"
                         element={<ProjectSettingPage />}
+                      />
+                      <Route
+                        path="/projects/:key/issues/:id"
+                        element={<ProjectIssuePage />}
+                      />
+                      <Route
+                        path="/projects/:key/issues/:id/edit"
+                        element={<ProjectIssueEditPage />}
                       />
                       <Route path="*" element={<Page404 />} />
                     </Routes>

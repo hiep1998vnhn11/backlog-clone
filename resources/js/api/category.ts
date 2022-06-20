@@ -24,6 +24,10 @@ interface CreateCategoryData {
   name: string
   description?: string | null
 }
+interface UpdateCategoryData {
+  name: string
+  description?: string | null
+}
 const indexApi = '/category'
 
 export function getCategories(projectKey: string) {
@@ -38,6 +42,11 @@ export function getCategories(projectKey: string) {
 export const createCategory = (data: CreateCategoryData) =>
   defHttp.post<ComponentProperty>({
     url: indexApi,
+    data,
+  })
+export const updateCategory = (id: number | string, data: UpdateCategoryData) =>
+  defHttp.put<ComponentProperty>({
+    url: indexApi + '/' + id,
     data,
   })
 

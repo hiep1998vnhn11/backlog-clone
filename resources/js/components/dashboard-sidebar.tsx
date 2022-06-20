@@ -50,11 +50,11 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
         icon: <ListAlt />,
         title: 'Issues',
       },
-      {
-        href: '/projects/' + projectKey + '/board',
-        icon: <Equalizer fontSize="small" />,
-        title: 'Board',
-      },
+      // {
+      //   href: '/projects/' + projectKey + '/board',
+      //   icon: <Equalizer fontSize="small" />,
+      //   title: 'Board',
+      // },
       {
         href: '/projects/' + projectKey + '/gantt-chart',
         icon: <ChartBarIcon fontSize="small" />,

@@ -24,6 +24,8 @@ class Issue extends Model
         'priority',
         'level',
         'tracker',
+        'start_date',
+        'spent_time'
     ];
 
     public function project()
@@ -48,6 +50,11 @@ class Issue extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(IssueCategory::class, 'category_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'issue_id');
     }
 }
