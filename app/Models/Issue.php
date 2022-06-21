@@ -57,4 +57,9 @@ class Issue extends Model
     {
         return $this->hasMany(Comment::class, 'issue_id');
     }
+
+    public function spents()
+    {
+        return $this->hasMany(SpentTime::class, 'issue_id');
+    }
 }

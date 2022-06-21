@@ -11,9 +11,13 @@ import {
   TableRow,
 } from '@mui/material'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
+import type { IssueTracking } from '/@/api/models/projectModel'
 
-const IssueTracking: React.FC<any> = (props) => {
-  const row = {}
+interface Props {
+  issues: IssueTracking[]
+  [key: string]: any
+}
+const IssueTrackingFC: React.FC<Props> = ({ issues, ...props }) => {
   return (
     <Card {...props}>
       <CardHeader title="Issues tracking" />
@@ -33,15 +37,20 @@ const IssueTracking: React.FC<any> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow
-              key={row.name}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
-              <TableCell align="left">{row.calories}</TableCell>
-              <TableCell align="center">{row.fat}</TableCell>
-              <TableCell align="center">{row.carbs}</TableCell>
-              <TableCell align="center">{row.protein}</TableCell>
-            </TableRow>
+            {issues.map((issue) => {
+              const total = +issue.open + +issue.closed
+              return (
+                <TableRow
+                  key={issue.tracker}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell align="center">{issue.tracker}</TableCell>
+                  <TableCell align="center">{issue.open}</TableCell>
+                  <TableCell align="center">{issue.closed}</TableCell>
+                  <TableCell align="center">{total}</TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </Box>
@@ -71,4 +80,4 @@ const IssueTracking: React.FC<any> = (props) => {
     </Card>
   )
 }
-export default IssueTracking
+export default IssueTrackingFC

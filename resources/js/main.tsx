@@ -1,6 +1,5 @@
 import App from './App'
 import { BrowserRouter } from 'react-router-dom'
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AuthProvider } from './context/useAuth'
 const container = document.getElementById('app') as HTMLDivElement
@@ -11,11 +10,9 @@ declare global {
 }
 
 root.render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
+  <BrowserRouter>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </BrowserRouter>
 )

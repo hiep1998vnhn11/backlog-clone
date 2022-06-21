@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\InviteMemberRequest;
+use App\Models\Activity;
 use App\Models\Member;
 use App\Models\Project;
 use App\Models\User;
@@ -81,6 +82,17 @@ class MemberController extends Controller
             'user_id' => $user->id,
             'status' => Member::STATUS_INVITED,
         ]);
+
+        Activity::create([
+            'project_id' => $project->id,
+            'type' => Activity::TYPE_MEMBER,
+            'object_id' => $user->id,
+            'user_id' => $user->id,
+            'data' => [
+                'label' => "Member {$user->name} is invited to join the project.",
+                'link' => 'members/' . $user->id,
+            ]
+        ]);
         // $member->sendInviteEmail();
         return $this->sendRespondSuccess();
     }
@@ -130,6 +142,17 @@ class MemberController extends Controller
         if ($member->user_id === $member->project->user_id) return $this->sendForbidden();
         if (!$member->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
         $member->delete();
+
+        Activity::create([
+            'project_id' => $member->project->id,
+            'type' => Activity::TYPE_MEMBER,
+            'object_id' => $member->user->id,
+            'user_id' => auth()->id(),
+            'data' => [
+                'label' => "Member {$member->user->name} is removed from the project.",
+                'link' => null,
+            ]
+        ]);
         return $this->sendRespondSuccess();
     }
 }

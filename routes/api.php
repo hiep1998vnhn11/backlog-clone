@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SpentTimeController;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middlewares\RoleMiddleware;
@@ -47,5 +50,7 @@ Route::group(
         Route::resource('/category', CategoryController::class);
         Route::resource('/issue', IssueController::class);
         Route::resource('/member', MemberController::class);
+        Route::resource('/activity', ActivityController::class);
+        Route::resource('/spent', SpentTimeController::class);
     }
 );

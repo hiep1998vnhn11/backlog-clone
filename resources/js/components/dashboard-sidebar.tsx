@@ -41,6 +41,11 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
         title: 'Home',
       },
       {
+        href: '/projects/' + projectKey + '/activity',
+        icon: <Equalizer fontSize="small" />,
+        title: 'Activity',
+      },
+      {
         href: '/projects/' + projectKey + '/add',
         icon: <Add fontSize="small" />,
         title: 'Add issue',
@@ -50,11 +55,11 @@ export const DashboardSidebar: React.FC<Props> = (props) => {
         icon: <ListAlt />,
         title: 'Issues',
       },
-      // {
-      //   href: '/projects/' + projectKey + '/board',
-      //   icon: <Equalizer fontSize="small" />,
-      //   title: 'Board',
-      // },
+      {
+        href: '/projects/' + projectKey + '/spents',
+        icon: <ListAlt />,
+        title: 'Spent time',
+      },
       {
         href: '/projects/' + projectKey + '/gantt-chart',
         icon: <ChartBarIcon fontSize="small" />,

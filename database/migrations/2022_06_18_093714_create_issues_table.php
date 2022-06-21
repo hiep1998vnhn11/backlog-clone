@@ -31,7 +31,7 @@ class CreateIssuesTable extends Migration
             $table->double('estimate_time', 20, 2)->default(0);
             $table->double('spent_time', 20, 2)->default(0);
             $table->smallInteger('percent_complete')->default(0);
-            $table->string('status', 32)->default('open');
+            $table->string('status', 32)->default('Open');
             $table->string('priority', 32)->default('normal');
             $table->string('level', 32)->default('normal');
             $table->string('tracker', 32)->default('feature');

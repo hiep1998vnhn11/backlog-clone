@@ -5,8 +5,10 @@ import {
   CategoryPluckModel,
 } from './models/categoryModel'
 import { PaginationParams } from './models/paginationModel'
-const indexApi = '/issue'
-export interface Issue {
+
+const indexApi = '/spent'
+
+export interface SpentTime {
   assignee_id: null | number
   category_id: null | number
   created_at: string
@@ -42,37 +44,17 @@ export interface Issue {
 }
 interface CreateIssueData {
   project_key: string
-  subject: string
-  tracker: string
-  description: string
-  priority: string
-  category_id?: number | null
-  assignee_id?: number | null
-  level: string
-  start_date?: string | null
-  due_date?: string | null
-  percent_complete: number | null
-  estimate_time: number | null
+  issue_id: number
+  user_id: number
+  hours: number
+  comment: string
+  date: string
+  activity: string
 }
 
-interface UpdateIssueData {
-  subject: string
-  tracker: string
-  description: string
-  priority: string
-  category_id?: number | null
-  assignee_id?: number | null
-  level: string
-  start_date?: string | null
-  due_date?: string | null
-  percent_complete: number | null
-  estimate_time: number | null
-  status: string
-}
-
-export function getIssues(params: any) {
+export function getListSpents(params: any) {
   return defHttp.get<{
-    data: Issue[]
+    data: SpentTime[]
     total: number
   }>({
     url: indexApi,
@@ -80,14 +62,14 @@ export function getIssues(params: any) {
   })
 }
 
-export const createIssue = (data: CreateIssueData) =>
+export const createSpent = (data: CreateIssueData) =>
   defHttp.post<number>({
     url: indexApi,
     data,
   })
 
-export const getIssue = (id: string | number, projectKey: string) =>
-  defHttp.get<Issue>({
+export const getSpent = (id: string | number, projectKey: string) =>
+  defHttp.get<SpentTime>({
     url: `${indexApi}/${id}`,
     params: {
       project_key: projectKey,
@@ -100,7 +82,7 @@ export const activeCategory = (params: { id: number; isActive?: boolean }) =>
     params,
   })
 
-export const updateIssue = (id: number, data: UpdateIssueData) =>
+export const updateIssue = (id: number, data: CreateIssueData) =>
   defHttp.put<CategoryModel>({
     url: indexApi + '/' + id,
     data,

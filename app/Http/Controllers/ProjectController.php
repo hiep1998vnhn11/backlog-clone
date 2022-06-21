@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\CreateCategoryRequest;
 use App\Http\Requests\Project\CreateProjectRequest;
+use App\Models\Activity;
+use App\Models\Issue;
 use App\Models\Member;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -51,6 +54,15 @@ class ProjectController extends Controller
             'status' => Member::STATUS_JOINED,
             'joined_at' => now(),
         ]);
+
+        Activity::create([
+            'project_id' => $project->id,
+            'type' => Activity::TYPE_CREATE_PROJECT,
+            'data' => [
+                'label' => 'Project ' . $project->name . ' has been created by ' . auth()->user()->name,
+                'link' => null
+            ]
+        ]);
         return $this->sendRespondSuccess($request->key);
     }
 
@@ -60,9 +72,33 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(string $project)
     {
-        //
+        $project = Project::where('key', $project)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+
+        $issues = Issue::query()
+            ->where('project_id', $project->id)
+            ->select('tracker', DB::raw("SUM(status != 'Closed') as open"), DB::raw("SUM(status = 'Closed') as closed"))
+            ->groupBy('tracker')
+            ->get();
+        $project->issue_tracking = $issues;
+
+        $sumEstimateTime = Issue::query()
+            ->where('project_id', $project->id)
+            ->sum('estimate_time');
+        $sumSpentTime = Issue::query()
+            ->where('project_id', $project->id)
+            ->sum('spent_time');
+        $project->estimate_time = $sumEstimateTime;
+        $project->spent_time = $sumSpentTime;
+
+        $project->joined_members = $project->members()
+            ->select('users.id', 'users.name')
+            ->join('users', 'users.id', '=', 'members.user_id')
+            ->where('members.status', Member::STATUS_JOINED)
+            ->get();
+        return $this->sendRespondSuccess($project);
     }
 
     /**

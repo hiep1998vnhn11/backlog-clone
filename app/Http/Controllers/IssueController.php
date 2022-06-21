@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Issue\CreateIssueRequest;
 use App\Http\Requests\Issue\UpdateIssueRequest;
+use App\Models\Activity;
 use App\Models\Issue;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -91,6 +92,17 @@ class IssueController extends Controller
             ])
         );
 
+        Activity::create([
+            'project_id' => $project->id,
+            'type' => Activity::TYPE_ISSUE,
+            'object_id' => $issue->id,
+            'user_id' => $issue->assignee_id,
+            'data' => [
+                'label' => "{$issue->tracker}#{$issue->id} (Open): {$issue->subject}",
+                'link' => 'issues/' . $issue->id,
+            ]
+        ]);
+
         return $this->sendRespondSuccess($issue->id);
     }
 
@@ -126,6 +138,17 @@ class IssueController extends Controller
     {
         if (!$issue->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
         $issue->update($request->validated());
+
+        Activity::create([
+            'project_id' => $issue->project->id,
+            'type' => Activity::TYPE_ISSUE,
+            'object_id' => $issue->id,
+            'user_id' => $issue->assignee_id,
+            'data' => [
+                'label' => "{$issue->tracker}#{$issue->id} ({$issue->status}): {$issue->subject}",
+                'link' => 'issues/' . $issue->id,
+            ]
+        ]);
         return $this->sendRespondSuccess();
     }
 

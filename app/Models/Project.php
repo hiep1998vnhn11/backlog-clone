@@ -41,6 +41,16 @@ class Project extends Model
         return $this->hasMany(Member::class);
     }
 
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function spentTimes()
+    {
+        return $this->hasMany(SpentTime::class);
+    }
+
     public function getAllMembers()
     {
         return $this->members()

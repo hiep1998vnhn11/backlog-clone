@@ -1,6 +1,16 @@
-import { Box, Card, CardHeader, Divider } from '@mui/material'
+import { Box, Button, Card, CardHeader, Divider } from '@mui/material'
+import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 
-const TimeTracking: React.FC<any> = (props) => {
+interface Props {
+  estimateTime: number
+  spentTime: number
+  [key: string]: any
+}
+const TimeTracking: React.FC<Props> = ({
+  estimateTime,
+  spentTime,
+  ...props
+}) => {
   return (
     <Card {...props}>
       <CardHeader title="Time tracking" />
@@ -12,9 +22,26 @@ const TimeTracking: React.FC<any> = (props) => {
         }}
       >
         <ul>
-          <li>Estimated time: </li>
-          <li>Spent time: </li>
+          <li>Estimated time: {estimateTime} Hours</li>
+          <li>Spent time: {spentTime} Hours</li>
         </ul>
+      </Box>
+
+      <Divider />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          p: 1,
+        }}
+      >
+        <Button
+          color="primary"
+          endIcon={<ArrowRightIcon fontSize="small" />}
+          size="small"
+        >
+          Log time
+        </Button>
       </Box>
     </Card>
   )

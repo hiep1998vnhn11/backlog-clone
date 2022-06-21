@@ -36,6 +36,7 @@ class UpdateIssueRequest extends FormRequest
             'due_date' => 'nullable|date',
             'estimate_time' => 'nullable|numeric',
             'percent_complete' => 'nullable|integer',
+            'status' => 'required|in:Open,Closed,Resolved,In progress',
         ];
     }
 }

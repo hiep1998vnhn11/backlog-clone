@@ -21,7 +21,6 @@ import { DatePicker, LoadingButton } from '@mui/lab'
 import { useMemberAndCategory, OptionItem } from './useMemberAndCategory'
 import useAuth from '/@/context/useAuth'
 import { createIssue } from '/@/api/issue'
-import {} from '/@/utils/format'
 import React from 'react'
 
 const AddIssue = () => {
@@ -30,11 +29,7 @@ const AddIssue = () => {
   const navigate = useNavigate()
   const params = useParams()
   const [loading, setLoading] = useState(false)
-  const {
-    members,
-    categories,
-    loading: loadingMember,
-  } = useMemberAndCategory(params.key!)
+  const { members, categories } = useMemberAndCategory(params.key!)
   const [description, setDescription] = useState('')
   const onDescriptionChange = useCallback((event: any) => {
     setDescription(event.editor.getData())
@@ -171,7 +166,7 @@ const AddIssue = () => {
                 loading={loading}
                 type="submit"
               >
-                Lưu
+                Save
               </LoadingButton>
             </div>
           </div>

@@ -19,6 +19,11 @@ export const getProjects = (params: any) =>
     params,
   })
 
+export const showProject = (projectKey: string) =>
+  defHttp.get<Project>({
+    url: `${indexApi}/${projectKey}`,
+  })
+
 export const getMemberAndCategory = (projectKey: string) =>
   defHttp.get({
     url: indexApi + '/' + projectKey + '/memberAndCategory',
