@@ -9,38 +9,22 @@ import { PaginationParams } from './models/paginationModel'
 const indexApi = '/spent'
 
 export interface SpentTime {
-  assignee_id: null | number
-  category_id: null | number
+  activity: string
+  comment: null | string
   created_at: string
-  description: null | string
-  due_date: null | string
-  estimate_time: number
-  spent_time: number
+  created_by: number
+  date: string
+  hours: number
   id: number
+  issue_id: number
+  issue_subject: string
+  issue_tracker: string
   level: string
-  percent_complete: number
-  priority: string
   project_id: number
-  status: string
-  subject: string
-  tracker: string
   updated_at: string
+  updated_by: number
   user_id: number
-  start_date: string | null
-  assignee_name?: null | string
-  category_name?: null | string
-  user?: {
-    name: string
-  }
-  category?: {
-    name: string
-  }
-  assignee?: {
-    name: string
-  }
-  comments?: {
-    id: number
-  }[]
+  user_name: string
 }
 interface CreateIssueData {
   project_key: string

@@ -56,11 +56,11 @@ const AccountListToolbar: React.FC<Props> = ({
         }}
       >
         <Typography sx={{ m: 1 }} variant="h4">
-          Quản lý tài khoản
+          Accounts manager
         </Typography>
         <Box sx={{ m: 1 }}>
           <Button color="primary" variant="contained" onClick={onCreate}>
-            Thêm tài khoản
+            Add account
           </Button>
         </Box>
       </Box>
@@ -81,11 +81,13 @@ const AccountListToolbar: React.FC<Props> = ({
                       </InputAdornment>
                     ),
                   }}
-                  placeholder="Theo tên, username, địa chỉ, số điện thoại, ..."
+                  placeholder="Name Or email"
                   variant="outlined"
                   value={searchKey}
                   onChange={handleChangeSearchKey}
-                  label="Tìm kiếm"
+                  label="Search..."
+                  autoComplete="off"
+                  name="Search account"
                 />
               </Grid>
               <Grid item md={4} xs={12}>

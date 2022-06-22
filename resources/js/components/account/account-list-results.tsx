@@ -47,7 +47,7 @@ interface Props {
 
 const roleColors: any = {
   admin: 'primary',
-  agent: 'secondary',
+  manager: 'secondary',
   shipper: 'info',
 }
 const AccountistResults: React.FC<Props> = ({
@@ -109,7 +109,7 @@ const AccountistResults: React.FC<Props> = ({
 
   const getAccountIcon = useCallback((roleName: string) => {
     if (roleName === 'admin') return <AdminPanelSettingsIcon />
-    if (roleName === 'agent') return <SupportAgentIcon />
+    if (roleName === 'manager') return <SupportAgentIcon />
     return <FaceIcon />
   }, [])
 
@@ -187,7 +187,7 @@ const AccountistResults: React.FC<Props> = ({
               variant="outlined"
               onClick={handleDeleteMulti}
             >
-              Xoá các tài khoản đang chọn
+              Delete {selectedCustomerIds.length} accounts
             </LoadingButton>
           </TableCell>
         ) : (
@@ -199,42 +199,18 @@ const AccountistResults: React.FC<Props> = ({
                   direction={sortDirection}
                   onClick={() => onSort('name')}
                 >
-                  Tên
+                  Name
                 </TableSortLabel>
               </Tooltip>
             </TableCell>
-            <TableCell
-              sortDirection={sortField === 'username' && sortDirection}
-            >
+            <TableCell sortDirection={sortField === 'email' && sortDirection}>
               <Tooltip enterDelay={300} title="Sắp xếp">
                 <TableSortLabel
-                  active={sortField === 'username'}
+                  active={sortField === 'email'}
                   direction={sortDirection}
-                  onClick={() => onSort('username')}
+                  onClick={() => onSort('email')}
                 >
-                  Username
-                </TableSortLabel>
-              </Tooltip>
-            </TableCell>
-            <TableCell sortDirection={sortField === 'address' && sortDirection}>
-              <Tooltip enterDelay={300} title="Sắp xếp">
-                <TableSortLabel
-                  active={sortField === 'address'}
-                  direction={sortDirection}
-                  onClick={() => onSort('address')}
-                >
-                  Địa chỉ
-                </TableSortLabel>
-              </Tooltip>
-            </TableCell>
-            <TableCell sortDirection={sortField === 'phone' && sortDirection}>
-              <Tooltip enterDelay={300} title="Sắp xếp">
-                <TableSortLabel
-                  active={sortField === 'phone'}
-                  direction={sortDirection}
-                  onClick={() => onSort('phone')}
-                >
-                  Số điện thoại
+                  Email
                 </TableSortLabel>
               </Tooltip>
             </TableCell>
@@ -245,7 +221,7 @@ const AccountistResults: React.FC<Props> = ({
                   direction={sortDirection}
                   onClick={() => onSort('role')}
                 >
-                  Vai trò
+                  Role
                 </TableSortLabel>
               </Tooltip>
             </TableCell>
@@ -258,11 +234,11 @@ const AccountistResults: React.FC<Props> = ({
                   direction={sortDirection}
                   onClick={() => onSort('created_at')}
                 >
-                  Ngày tạo
+                  Created at
                 </TableSortLabel>
               </Tooltip>
             </TableCell>
-            <TableCell>Hành động</TableCell>
+            <TableCell>Action</TableCell>
           </>
         )}
       </TableRow>
@@ -331,19 +307,14 @@ const AccountistResults: React.FC<Props> = ({
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>{customer.username}</TableCell>
-                    <TableCell>{customer.address}</TableCell>
-                    <TableCell>{customer.phone}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
                     <TableCell>
-                      {customer.roles?.map((role) => (
-                        <Chip
-                          key={role.id}
-                          icon={getAccountIcon(role.name)}
-                          label={role.name}
-                          variant="outlined"
-                          color={roleColors[role.name]}
-                        />
-                      ))}
+                      <Chip
+                        icon={getAccountIcon(customer.role)}
+                        label={customer.role}
+                        variant="outlined"
+                        color={roleColors[customer.role]}
+                      />
                     </TableCell>
                     <TableCell>{formatDateOnly(customer.created_at)}</TableCell>
                     <TableCell>

@@ -5,6 +5,7 @@ import IndexPage from './pages/index'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import AccountPage from './pages/account'
+import AccountsPage from './pages/accounts'
 import ProjectPage from './pages/projects'
 import ProjectAddIssuePage from './pages/projects/add'
 import ProjectAddSpentPage from './pages/projects/spents/add'
@@ -13,7 +14,10 @@ import ProjectGanttPage from './pages/projects/gantt'
 
 import ProjectIssuesPage from './pages/projects/issues'
 import ProjectIssuePage from './pages/projects/issues/id'
+import ProjectIssueSpentPage from './pages/projects/issues/spent'
 import ProjectIssueEditPage from './pages/projects/issues/edit'
+
+import ProjectMemberPage from './pages/projects/members/id'
 
 import ProjectSpentListPage from './pages/projects/spents'
 import ProjectSpentPage from './pages/projects/spents/id'
@@ -57,6 +61,7 @@ function App() {
                     <Routes>
                       <Route path="/" element={<IndexPage />} />
                       <Route path="/account" element={<AccountPage />} />
+                      <Route path="/accounts" element={<AccountsPage />} />
                       <Route path="/projects/:key" element={<ProjectPage />} />
                       <Route
                         path="/projects/:key/add"
@@ -66,7 +71,6 @@ function App() {
                         path="/projects/:key/add/spent"
                         element={<ProjectAddSpentPage />}
                       />
-
                       <Route
                         path="/projects/:key/board"
                         element={<ProjectBoardPage />}
@@ -96,12 +100,21 @@ function App() {
                         element={<ProjectIssueEditPage />}
                       />
                       <Route
+                        path="/projects/:key/issues/:id/spent"
+                        element={<ProjectIssueSpentPage />}
+                      />
+
+                      <Route
                         path="/projects/:key/spents"
                         element={<ProjectSpentListPage />}
                       />
                       <Route
                         path="/projects/:key/spents/:id"
                         element={<ProjectSpentPage />}
+                      />
+                      <Route
+                        path="/projects/:key/members/:id"
+                        element={<ProjectMemberPage />}
                       />
                       <Route
                         path="/projects/:key/spents/:id/edit"

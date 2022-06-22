@@ -18,6 +18,8 @@ import { Issue } from '/@/api/issue'
 import { formatDateOnly, formatDate } from '/@/utils/format'
 import { issuePercent } from '/@/pages/projects/issues/format'
 import { SpentTime } from '/@/api/spent'
+import IconDelete from '@mui/icons-material/Delete'
+import IconEdit from '@mui/icons-material/Edit'
 
 interface Props {
   spents: SpentTime[]
@@ -33,48 +35,41 @@ interface Props {
   sortDirection: 'asc' | 'desc'
 }
 interface CustomerRowProps {
-  order: Issue
+  spent: SpentTime
   projectKey: string
 }
 
-const CustomerRow = ({ order, projectKey }: CustomerRowProps) => {
+const CustomerRow = ({ spent, projectKey }: CustomerRowProps) => {
   return (
-    <TableRow hover key={order.id} sx={{ '& > *': { borderBottom: 'unset' } }}>
-      <TableCell>
+    <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <TableCell>{formatDateOnly(spent.date)}</TableCell>
+      <TableCell padding="none">
         <Link
-          to={`/projects/${projectKey}/issues/${order.id}`}
-          className={`chip-${order.tracker}`}
+          to={`/projects/${projectKey}/members/${spent.user_id}`}
+          className="link"
         >
-          #{order.id}
+          {spent.user_name}
         </Link>
       </TableCell>
-      <TableCell padding="none">{order.tracker}</TableCell>
+      <TableCell padding="none">{spent.activity}</TableCell>
       <TableCell padding="none">
         <Link
           className="link"
-          to={`/projects/${projectKey}/issues/${order.id}`}
+          to={`/projects/${projectKey}/issues/${spent.issue_id}`}
         >
-          {order.subject}
+          {spent.issue_subject}
         </Link>
       </TableCell>
-      <TableCell padding="none">{order.status}</TableCell>
-      <TableCell padding="none">{order.priority}</TableCell>
+      <TableCell padding="none">{spent.comment}</TableCell>
+      <TableCell padding="none">{spent.hours}</TableCell>
+      <TableCell padding="none">{spent.level}</TableCell>
       <TableCell padding="none">
-        <Link
-          className="link"
-          to={`/projects/${projectKey}/members/${order.assignee_id}`}
-        >
-          {order.assignee_name}
-        </Link>
-      </TableCell>
-      <TableCell padding="none">{formatDate(order.updated_at)}</TableCell>
-      <TableCell padding="none">{order.category_name}</TableCell>
-      <TableCell padding="none">{formatDateOnly(order.start_date)}</TableCell>
-      <TableCell padding="none">{formatDateOnly(order.due_date)}</TableCell>
-      <TableCell padding="none">{order.estimate_time || 0}</TableCell>
-      <TableCell padding="none">{order.spent_time || 0}</TableCell>
-      <TableCell padding="none">
-        {issuePercent(order.percent_complete || 0)}
+        <IconButton color="success">
+          <IconEdit />
+        </IconButton>
+        <IconButton color="error">
+          <IconDelete />
+        </IconButton>
       </TableCell>
     </TableRow>
   )
@@ -84,7 +79,7 @@ const rowPropsAreEqual = (
   prevProps: CustomerRowProps,
   nextProps: CustomerRowProps
 ) => {
-  return prevProps.order.id === nextProps.order.id
+  return prevProps.spent.id === nextProps.spent.id
 }
 const MemoedCustomerRow = React.memo(CustomerRow, rowPropsAreEqual)
 
@@ -120,157 +115,90 @@ const IssueList: React.FC<Props> = ({
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>#</TableCell>
                 <TableCell
-                  padding="none"
-                  sortDirection={sortField === 'tracker' && sortDirection}
+                  sortDirection={sortField === 'date' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'tracker'}
+                    active={sortField === 'date'}
                     direction={sortDirection}
-                    onClick={() => onSort('tracker')}
+                    onClick={() => onSort('date')}
                   >
-                    Tracker
+                    Date
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'subject' && sortDirection}
+                  sortDirection={sortField === 'user' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'subject'}
+                    active={sortField === 'user'}
                     direction={sortDirection}
-                    onClick={() => onSort('subject')}
+                    onClick={() => onSort('user')}
                   >
-                    Subject
+                    User
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'status' && sortDirection}
+                  sortDirection={sortField === 'activity' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'status'}
+                    active={sortField === 'activity'}
                     direction={sortDirection}
-                    onClick={() => onSort('status')}
+                    onClick={() => onSort('activity')}
                   >
-                    Status
+                    Activity
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'priority' && sortDirection}
+                  sortDirection={sortField === 'issue' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'priority'}
+                    active={sortField === 'issue'}
                     direction={sortDirection}
-                    onClick={() => onSort('priority')}
+                    onClick={() => onSort('issue')}
                   >
-                    Priority
+                    Issue
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'assignee_name' && sortDirection}
+                  sortDirection={sortField === 'comment' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'assignee_name'}
+                    active={sortField === 'comment'}
                     direction={sortDirection}
-                    onClick={() => onSort('assignee_name')}
+                    onClick={() => onSort('comment')}
                   >
-                    Assignee
+                    Comment
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'updated_at' && sortDirection}
+                  sortDirection={sortField === 'hours' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'updated_at'}
+                    active={sortField === 'hours'}
                     direction={sortDirection}
-                    onClick={() => onSort('updated_at')}
+                    onClick={() => onSort('hours')}
                   >
-                    Updated
+                    Hours
                   </TableSortLabel>
                 </TableCell>
                 <TableCell
                   padding="none"
-                  sortDirection={sortField === 'category_name' && sortDirection}
+                  sortDirection={sortField === 'level' && sortDirection}
                 >
                   <TableSortLabel
-                    active={sortField === 'category_name'}
+                    active={sortField === 'level'}
                     direction={sortDirection}
-                    onClick={() => onSort('category_name')}
+                    onClick={() => onSort('level')}
                   >
-                    Category
+                    Level
                   </TableSortLabel>
                 </TableCell>
-                <TableCell
-                  padding="none"
-                  sortDirection={sortField === 'start_date' && sortDirection}
-                >
-                  <TableSortLabel
-                    active={sortField === 'start_date'}
-                    direction={sortDirection}
-                    onClick={() => onSort('start_date')}
-                  >
-                    Start date
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell
-                  padding="none"
-                  sortDirection={sortField === 'due_date' && sortDirection}
-                >
-                  <TableSortLabel
-                    active={sortField === 'due_date'}
-                    direction={sortDirection}
-                    onClick={() => onSort('due_date')}
-                  >
-                    Due date
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell
-                  padding="none"
-                  sortDirection={sortField === 'estimate_time' && sortDirection}
-                >
-                  <TableSortLabel
-                    active={sortField === 'estimate_time'}
-                    direction={sortDirection}
-                    onClick={() => onSort('estimate_time')}
-                  >
-                    Estimated
-                    <br />
-                    time
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell
-                  padding="none"
-                  sortDirection={sortField === 'spent_time' && sortDirection}
-                >
-                  <TableSortLabel
-                    active={sortField === 'spent_time'}
-                    direction={sortDirection}
-                    onClick={() => onSort('spent_time')}
-                  >
-                    Spent
-                    <br />
-                    time
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell
-                  padding="none"
-                  sortDirection={
-                    sortField === 'percent_complete' && sortDirection
-                  }
-                >
-                  <TableSortLabel
-                    active={sortField === 'percent_complete'}
-                    direction={sortDirection}
-                    onClick={() => onSort('percent_complete')}
-                  >
-                    % Done
-                  </TableSortLabel>
-                </TableCell>
+                <TableCell padding="none">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -290,10 +218,10 @@ const IssueList: React.FC<Props> = ({
                   </td>
                 </tr>
               ) : (
-                spents.map((order) => (
+                spents.map((spent) => (
                   <MemoedCustomerRow
-                    order={order}
-                    key={order.id}
+                    spent={spent}
+                    key={spent.id}
                     projectKey={projectKey}
                   />
                 ))

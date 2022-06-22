@@ -8,6 +8,7 @@ use App\Models\Activity;
 use App\Models\Issue;
 use App\Models\Member;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -22,14 +23,14 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $query = Project::query()
-            ->select('projects.*')
-            ->leftJoin('members', 'projects.id', '=', 'members.project_id')
-            ->where('projects.user_id', auth()->id())
-            ->orWhere(function ($q) {
-                $q->where('members.user_id', auth()->id())
-                    ->where('members.status', Member::STATUS_INVITED);
-            })
-            ->paginate($request->limit ?? 12);
+            ->select('projects.*');
+        $user = auth()->user();
+        if ($user->role != User::ROLE_ADMIN) {
+            $query = $query->join('members', 'projects.id', '=', 'members.project_id')
+                ->where('members.user_id', auth()->id())
+                ->where('members.status', Member::STATUS_JOINED);
+        }
+        $query =  $query->paginate($request->limit ?? 12);
         return $this->sendRespondSuccess(
             $query
         );
@@ -43,6 +44,7 @@ class ProjectController extends Controller
      */
     public function store(CreateProjectRequest $request)
     {
+        if (!auth()->user()->hasPermissionCreateProject()) return $this->sendForbidden();
         $project = Project::create(
             array_merge($request->validated(), [
                 'user_id' => auth()->id(),
@@ -75,7 +77,7 @@ class ProjectController extends Controller
     public function show(string $project)
     {
         $project = Project::where('key', $project)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
 
         $issues = Issue::query()
             ->where('project_id', $project->id)
@@ -129,14 +131,9 @@ class ProjectController extends Controller
         $params = $request->all();
         $searchKey = Arr::get($params, 'search_key', null);
         $projects = Project::select('projects.name', 'projects.key')
-            ->leftJoin('members', 'members.project_id', '=', 'projects.id')
-            ->where(function ($q) {
-                $q->where('projects.user_id', auth()->id())
-                    ->orWhere(function ($q2) {
-                        $q2->where('members.user_id', auth()->id())
-                            ->where('members.status', Member::STATUS_INVITED);
-                    });
-            })
+            ->join('members', 'members.project_id', '=', 'projects.id')
+            ->where('members.user_id', auth()->id())
+            ->where('members.status', Member::STATUS_JOINED)
             ->when($searchKey, function ($q, $searchKey) {
                 $q->where('name', 'like', '%' . $searchKey . '%')
                     ->orWhere('key', 'like', '%' . $searchKey . '%');

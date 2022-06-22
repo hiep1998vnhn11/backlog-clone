@@ -26,7 +26,8 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'password',
         'avatar',
-        'member'
+        'member',
+        'role',
     ];
 
     /**
@@ -84,5 +85,10 @@ class User extends Authenticatable implements JWTSubject
     public function hasPermissionCreateProject()
     {
         return $this->isAdmin() || $this->isManager();
+    }
+
+    public function hasAnyRole(array $roles)
+    {
+        return in_array($this->role, $roles);
     }
 }

@@ -15,9 +15,10 @@ import type { IssueTracking } from '/@/api/models/projectModel'
 
 interface Props {
   issues: IssueTracking[]
+  showFooter?: boolean
   [key: string]: any
 }
-const IssueTrackingFC: React.FC<Props> = ({ issues, ...props }) => {
+const IssueTrackingFC: React.FC<Props> = ({ issues, showFooter, ...props }) => {
   return (
     <Card {...props}>
       <CardHeader title="Issues tracking" />
@@ -54,30 +55,37 @@ const IssueTrackingFC: React.FC<Props> = ({ issues, ...props }) => {
           </TableBody>
         </Table>
       </Box>
-      <Divider />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          p: 1,
-        }}
-      >
-        <Button
-          color="primary"
-          endIcon={<ArrowRightIcon fontSize="small" />}
-          size="small"
-        >
-          Gantt chart
-        </Button>
-        <Button
-          color="primary"
-          endIcon={<ArrowRightIcon fontSize="small" />}
-          size="small"
-        >
-          View all issues
-        </Button>
-      </Box>
+      {showFooter && (
+        <>
+          <Divider />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              p: 1,
+            }}
+          >
+            <Button
+              color="primary"
+              endIcon={<ArrowRightIcon fontSize="small" />}
+              size="small"
+            >
+              Gantt chart
+            </Button>
+            <Button
+              color="primary"
+              endIcon={<ArrowRightIcon fontSize="small" />}
+              size="small"
+            >
+              View all issues
+            </Button>
+          </Box>
+        </>
+      )}
     </Card>
   )
 }
 export default IssueTrackingFC
+IssueTrackingFC.defaultProps = {
+  showFooter: true,
+}

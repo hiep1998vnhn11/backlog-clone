@@ -20,7 +20,7 @@ class CategoryController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $categories = $project->issueCategories;
 
         return $this->sendRespondSuccess($categories);
@@ -34,7 +34,7 @@ class CategoryController extends Controller
     public function store(CreateCategoryRequest $request)
     {
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $checkCategory = IssueCategory::where('project_id', $project->id)
             ->where('name', $request->name)->first();
         if ($checkCategory) return $this->sendUnvalidated([
@@ -79,7 +79,7 @@ class CategoryController extends Controller
      */
     public function update(ProjectUpdateCategoryRequest $request, IssueCategory $category)
     {
-        if (!$category->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$category->project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $checkCategory = $category->project->issueCategories()
             ->where('name', $request->name)
             ->where('id', '!=', $category->id)
@@ -102,7 +102,7 @@ class CategoryController extends Controller
     public function destroy(IssueCategory $category)
     {
         $project = $category->project;
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $category->delete();
         return $this->sendRespondSuccess();
     }

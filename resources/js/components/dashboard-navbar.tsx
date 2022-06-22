@@ -23,6 +23,7 @@ import useAuth from '../context/useAuth'
 import { Cog as CogIcon } from '../icons/cog'
 import { Search as SearchIcon } from '../icons/search'
 import { projectPluck } from '/@/api/project'
+import { RoleEnum } from '../enums/roleEnum'
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }: { theme: Theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -173,6 +174,12 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
             </div>
           )}
         </div>
+
+        {user?.role === RoleEnum.ADMIN && (
+          <Button LinkComponent={Link} to="/accounts">
+            Accounts
+          </Button>
+        )}
         <Box sx={{ flexGrow: 1 }} />
 
         <Tooltip title="Notifications">

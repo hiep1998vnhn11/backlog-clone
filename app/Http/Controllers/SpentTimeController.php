@@ -19,12 +19,14 @@ class SpentTimeController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $sortBy = $request->sort_by ?? 'updated_at';
         $sortType = $request->sort_type ?? 'desc';
         $user = $request->user ?? '';
         $activity = $request->activity ?? '';
+        $level = $request->level ?? '';
         $limit = $request->limit ?? 10;
+        $searchKey = $request->search_key ?? '';
         if (!in_array($activity, [
             'All', 'Development', 'Check'
         ])) $activity = 'All';
@@ -47,9 +49,17 @@ class SpentTimeController extends Controller
             ->when($user, function ($q, $user) {
                 $q->where('spent_times.user_id', $user);
             })
+            ->when($searchKey, function ($q, $searchKey) {
+                $q->where('issues.subject', 'like', '%' . $searchKey . '%');
+            })
             ->when($activity, function ($q, $activity) {
                 if ($activity !== 'All') {
                     $q->where('spent_times.activity', '=', $activity);
+                }
+            })
+            ->when($level, function ($q, $level) {
+                if ($level !== 'All') {
+                    $q->where('spent_times.level', '=', $level);
                 }
             })
             ->orderBy($sortBy, $sortType)
@@ -78,7 +88,7 @@ class SpentTimeController extends Controller
     public function store(CreateSpentTimeRequest $request)
     {
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $issue = $project->issues()->where('id', $request->issue_id)->firstOrFail();
 
         $spent = SpentTime::create(array_merge(

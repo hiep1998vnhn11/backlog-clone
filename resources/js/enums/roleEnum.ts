@@ -1,10 +1,5 @@
 export enum RoleEnum {
-  AGENT = 'agent',
-  SHIPPER = 'shipper',
+  MANAGER = 'manager',
+  MEMBER = 'member',
   ADMIN = 'admin',
-}
-
-export enum StatusEnum {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
 }

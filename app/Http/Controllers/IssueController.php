@@ -20,7 +20,7 @@ class IssueController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $sortBy = $request->sort_by ?? 'updated_at';
         $sortType = $request->sort_type ?? 'desc';
         $searchKey = $request->search_key ?? '';
@@ -101,7 +101,7 @@ class IssueController extends Controller
     {
         $project = Project::where('key', $request->project_key)
             ->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
 
         $issue = Issue::create(
             array_merge($request->validated(), [
@@ -136,7 +136,7 @@ class IssueController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         if ($project->id !== $issue->project_id) return $this->sendForbidden();
         $issue->load([
             'comments',
@@ -156,7 +156,7 @@ class IssueController extends Controller
      */
     public function update(UpdateIssueRequest $request, Issue $issue)
     {
-        if (!$issue->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$issue->project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $issue->update($request->validated());
 
         Activity::create([
@@ -181,5 +181,15 @@ class IssueController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function spents(Issue $issue)
+    {
+        if (!$issue->project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $spents = $issue->spents()
+            ->select('spent_times.*', 'users.name as user_name')
+            ->leftJoin('users', 'spent_times.user_id', '=', 'users.id')
+            ->get();
+        return $this->sendRespondSuccess($spents);
     }
 }

@@ -23,7 +23,7 @@ export const AccountProfile: React.FC<any> = (props) => {
   const toggleOpen = useCallback(() => setOpen((value) => !value), [])
 
   const handleUpload = useCallback(async () => {
-    if (!file) return toastError('Hãy chọn file ảnh để tải lên!')
+    if (!file) return toastError('Please select a file to upload!')
     try {
       setLoading(true)
       const res = await uploadApi({ file })
@@ -70,14 +70,14 @@ export const AccountProfile: React.FC<any> = (props) => {
         <Divider />
         <CardActions>
           <Button color="primary" fullWidth variant="text" onClick={toggleOpen}>
-            Tải lên ảnh đại diện
+            Upload new avatar
           </Button>
         </CardActions>
       </Card>
       <Dialog
         open={open}
         onClose={toggleOpen}
-        title="Tải ảnh đại diện"
+        title="Upload new avatar"
         onConfirm={handleUpload}
         loading={loading}
       >

@@ -1,6 +1,7 @@
 import { defHttp } from '/@/utils/http'
 import { CategoryModel, CategoryPluckModel } from './models/categoryModel'
 const indexApi = '/member'
+import { Activity } from './activity'
 
 export interface Member {
   id: number
@@ -11,10 +12,20 @@ export interface Member {
   status: string
   joined_at: string
   avatar: string
+  role: string
+  issue_tracking: any[]
+  related_projects: RelatedProject[]
+  related_activities: Record<string, Activity[]>
 }
 interface CreateMemberData {
   project_key: string
   email: string
+}
+export interface RelatedProject {
+  created_at: string
+  key: string
+  name: string
+  joined_at: string
 }
 
 interface UpdateIssueData {
@@ -44,7 +55,7 @@ export const createMember = (data: CreateMemberData) =>
     data,
   })
 
-export const getIssue = (id: string | number, projectKey: string) =>
+export const getMember = (id: string | number, projectKey: string) =>
   defHttp.get<Member>({
     url: `${indexApi}/${id}`,
     params: {

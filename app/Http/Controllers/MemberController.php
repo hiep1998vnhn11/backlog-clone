@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\InviteMemberRequest;
 use App\Models\Activity;
+use App\Models\Issue;
 use App\Models\Member;
 use App\Models\Project;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MemberController extends Controller
 {
@@ -20,7 +23,7 @@ class MemberController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $searchKey = $request->search_key ?? '';
         $status = $request->status ?? '';
         $members = Member::query()
@@ -64,7 +67,7 @@ class MemberController extends Controller
     public function store(InviteMemberRequest $request)
     {
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $user = User::where('email', $request->email)->firstOrFail();
         $member = Member::query()
             ->where('project_id', $project->id)
@@ -103,9 +106,53 @@ class MemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
-        //
+        if (!$request->project_key) return $this->sendRespondError();
+        $project = Project::where('key', $request->project_key)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $member = User::select('users.*')
+            ->join('members', 'members.user_id', '=', 'users.id')
+            ->where('members.project_id', $project->id)
+            ->where('users.id', $id)
+            ->where('members.status', Member::STATUS_JOINED)
+            ->firstOrFail();
+
+        $issues = Issue::query()
+            ->where('assignee_id', $member->id)
+            ->select('tracker', DB::raw("SUM(status != 'Closed') as open"), DB::raw("SUM(status = 'Closed') as closed"))
+            ->groupBy('tracker')
+            ->get();
+        $member->issue_tracking = $issues;
+
+        $projects = Project::query()
+            ->join('members', 'members.project_id', '=', 'projects.id')
+            ->where('members.user_id', $member->id)
+            ->where('members.status', Member::STATUS_JOINED)
+            ->select(
+                'members.created_at as joined_at',
+                'projects.name',
+                'projects.key',
+                'projects.created_at'
+            )
+            ->get();
+        $member->related_projects = $projects;
+
+        $activities = $project->activities()
+            ->select(
+                'activities.*',
+                'users.name as user_name',
+            )
+            ->leftJoin('users', 'activities.user_id', '=', 'users.id')
+            ->where('activities.user_id', $member->id)
+            ->orderBy('activities.created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->groupBy(function ($item) {
+                return Carbon::parse($item->created_at)->format('Y-m-d');
+            });
+        $member->related_activities = $activities;
+        return $this->sendRespondSuccess($member);
     }
 
     /**
@@ -140,7 +187,7 @@ class MemberController extends Controller
     public function destroy(Member $member)
     {
         if ($member->user_id === $member->project->user_id) return $this->sendForbidden();
-        if (!$member->project->hasPermissionCreateIssue(auth()->id())) return $this->sendForbidden();
+        if (!$member->project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $member->delete();
 
         Activity::create([

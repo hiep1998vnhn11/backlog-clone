@@ -10,6 +10,11 @@ import {
   Grid,
   Autocomplete,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material'
 import { Search as SearchIcon } from '../../icons/search'
 import { useState } from 'react'
@@ -21,34 +26,26 @@ import {
 
 interface Props {
   handleChangeSearchKey: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleCategoryChange: (value: string) => void
   handleAssigneeChange: (value: string) => void
   setStatus: (value: string) => void
   searchKey: string
   projectKey: string
   status: string
+  level: string
+  setLevel: (value: string) => void
 }
 
-const issueStatus = [
-  'All',
-  'Open',
-  'In progress',
-  'Resolved',
-  'Closed',
-  'Not closed',
-]
+const issueStatus = ['All', 'Development', 'Check']
 const OrderListToolbar: React.FC<Props> = (props) => {
   const params = useParams()
   const [assigneeSelected, setAssigneeSelected] = useState<OptionItem | null>(
     null
   )
-  const [categorySelected, setCategorySelected] = useState<OptionItem | null>(
-    null
-  )
-  const { members, categories } = useMemberAndCategory(props.projectKey)
+  const { members } = useMemberAndCategory(props.projectKey)
   const {
     handleChangeSearchKey,
-    handleCategoryChange,
+    setLevel,
+    level,
     handleAssigneeChange,
     searchKey,
     status,
@@ -62,14 +59,10 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     },
     []
   )
-  const handleSelectedCategoryChange = useCallback(
-    (_: any, value: OptionItem | null) => {
-      handleCategoryChange(value ? value.value + '' : '')
-      setCategorySelected(value)
-    },
-    []
-  )
-  const handleClick = useCallback(() => {}, [])
+
+  const handleLevelChange = useCallback((event: SelectChangeEvent<string>) => {
+    setLevel(event.target.value)
+  }, [])
 
   return (
     <Box {...props}>
@@ -135,30 +128,34 @@ const OrderListToolbar: React.FC<Props> = (props) => {
               <Grid item md={2} xs={6}>
                 <Autocomplete
                   disablePortal
-                  id="assignee"
+                  id="user"
                   size="small"
                   options={members}
                   value={assigneeSelected}
                   onChange={handleSelectedAssigneeChange}
                   fullWidth
                   renderInput={(params) => (
-                    <TextField {...params} label="Assignee" />
+                    <TextField {...params} label="User" />
                   )}
                 />
               </Grid>
               <Grid item md={2} xs={6}>
-                <Autocomplete
-                  disablePortal
-                  id="category"
-                  size="small"
-                  options={categories}
-                  value={categorySelected}
-                  onChange={handleSelectedCategoryChange}
-                  fullWidth
-                  renderInput={(params) => (
-                    <TextField {...params} label="Category" />
-                  )}
-                />
+                <FormControl fullWidth size="small">
+                  <InputLabel id="date-type">Level</InputLabel>
+                  <Select
+                    labelId="date-type"
+                    id="date-type"
+                    value={level}
+                    label="Start Date"
+                    onChange={handleLevelChange}
+                  >
+                    <MenuItem value="All">All</MenuItem>
+                    <MenuItem value="Easy">Easy</MenuItem>
+                    <MenuItem value="Normal">Normal</MenuItem>
+                    <MenuItem value="Hard">Hard</MenuItem>
+                    <MenuItem value="Extremely hard">Extremely hard</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
           </CardContent>

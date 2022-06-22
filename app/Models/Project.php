@@ -59,11 +59,11 @@ class Project extends Model
             ->get();
     }
 
-    public function hasPermissionCreateIssue($userId)
+    public function hasPermissionCreateIssue(User $user)
     {
-        if ($this->user_id === $userId) return true;
+        if ($this->user_id === $user->id || $user->role === User::ROLE_ADMIN) return true;
         $member = $this->members()
-            ->where('user_id', $userId)
+            ->where('user_id', $user->id)
             ->first();
         if ($member) return true;
         return false;

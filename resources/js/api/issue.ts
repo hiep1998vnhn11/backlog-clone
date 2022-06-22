@@ -4,7 +4,7 @@ import {
   CategoryModel,
   CategoryPluckModel,
 } from './models/categoryModel'
-import { PaginationParams } from './models/paginationModel'
+import { SpentTime } from './spent'
 const indexApi = '/issue'
 export interface Issue {
   assignee_id: null | number
@@ -111,3 +111,6 @@ export const deleteCategory = (id: number, _u?: string) =>
 
 export const getPluckCategory = () =>
   defHttp.get<CategoryPluckModel[]>({ url: indexApi + '/pluck' })
+
+export const getIssueSpents = (id: number) =>
+  defHttp.get<SpentTime[]>({ url: indexApi + '/' + id + '/spents' })

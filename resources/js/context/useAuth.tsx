@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   ReactNode,
   useContext,
@@ -10,7 +10,7 @@ import React, {
 } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { User } from '/@/api/models/authModel'
-import { loginApi, getUser } from '/@/api/auth'
+import { loginApi } from '/@/api/auth'
 import storage from '/@/utils/storage'
 
 interface AuthContextType {

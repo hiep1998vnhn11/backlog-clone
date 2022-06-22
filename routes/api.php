@@ -45,7 +45,9 @@ Route::group(
         Route::get('/project/{projectKey}/memberAndCategory', [ProjectController::class, 'memberAndCategory']);
 
         Route::get('/project/pluck', [ProjectController::class, 'pluck']);
+        Route::get('/issue/{issue}/spents', [IssueController::class, 'spents']);
 
+        Route::resource('account', AccountController::class)->middleware('role:admin');
         Route::resource('/project', ProjectController::class);
         Route::resource('/category', CategoryController::class);
         Route::resource('/issue', IssueController::class);

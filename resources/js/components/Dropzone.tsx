@@ -11,7 +11,7 @@ const Dropzone: React.FC<Props> = ({ file, setFile }) => {
   const { toastError } = useApp()
   const onDrop = useCallback((acceptedFiles: File[], rejectedFile: any[]) => {
     if (rejectedFile.length > 0) {
-      return toastError('Hãy chọn duy nhất 1 file ảnh dưới 2MB để tải lên!')
+      return toastError('Please select only 1 file less than 2MB!')
     }
     setFile(acceptedFiles[0])
   }, [])
@@ -50,9 +50,9 @@ const Dropzone: React.FC<Props> = ({ file, setFile }) => {
       <div {...getRootProps()} className="dropzone">
         <input {...getInputProps()} multiple={false} />
         {isDragActive ? (
-          <p>Thả file xuống để tải lên</p>
+          <p>Drop file here</p>
         ) : (
-          <p>Kéo thả hoặc bấm vào đây để tải lên (file nhỏ hơn 2MB)</p>
+          <p>Drop file here (file less than 2MB)</p>
         )}
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   Container,
   Grid,
   Icon,
+  Skeleton,
   Typography,
 } from '@mui/material'
 import Page404 from '../../404'
@@ -35,7 +36,22 @@ const IssuePage: React.FC = () => {
       isMounted.current = false
     }
   }, [params])
-  if (loading) return <Box>Loading</Box>
+  if (loading)
+    return (
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 2,
+        }}
+      >
+        <div className="flex justify-between mb-2">
+          <Skeleton variant="rectangular" height={30} />
+          <Skeleton variant="rectangular" height={30} />
+        </div>
+        <Skeleton variant="rectangular" height={600} />
+      </Box>
+    )
   if (issue === null) return <Page404 />
   return (
     <Box
