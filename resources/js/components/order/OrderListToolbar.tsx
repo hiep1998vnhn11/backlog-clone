@@ -10,10 +10,13 @@ import {
   Grid,
   Autocomplete,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material'
 import { Search as SearchIcon } from '../../icons/search'
-import { Upload as UploadIcon } from '../../icons/upload'
-import { Download as DownloadIcon } from '../../icons/download'
 import { useState } from 'react'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Link } from 'react-router-dom'
@@ -30,6 +33,10 @@ interface Props {
   searchKey: string
   projectKey: string
   status: string
+  dateType: string
+  setDateType: (value: string) => void
+  date: null | Date
+  setDate: (value: Date | null) => void
 }
 
 const issueStatus = [
@@ -56,6 +63,10 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     searchKey,
     status,
     setStatus,
+    dateType,
+    setDateType,
+    date,
+    setDate,
   } = props
 
   const handleSelectedAssigneeChange = useCallback(
@@ -72,7 +83,12 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     },
     []
   )
-  const handleClick = useCallback(() => {}, [])
+  const handleDateTypeChange = useCallback(
+    (event: SelectChangeEvent<string>) => {
+      setDateType(event.target.value)
+    },
+    []
+  )
 
   return (
     <Box {...props}>
@@ -162,6 +178,41 @@ const OrderListToolbar: React.FC<Props> = (props) => {
                     <TextField {...params} label="Category" />
                   )}
                 />
+              </Grid>
+
+              <Grid item md={5} xs={12}>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="date-type">Start date</InputLabel>
+                      <Select
+                        labelId="date-type"
+                        id="date-type"
+                        value={dateType}
+                        label="Start Date"
+                        onChange={handleDateTypeChange}
+                      >
+                        <MenuItem value="">None</MenuItem>
+                        <MenuItem value="today">Today</MenuItem>
+                        <MenuItem value="week">This week</MenuItem>
+                        <MenuItem value="month">This month</MenuItem>
+                        <MenuItem value="day">Select day</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div className="flex-1">
+                    {dateType === 'day' && (
+                      <DatePicker
+                        label="Select date"
+                        value={date}
+                        onChange={setDate}
+                        renderInput={(params: any) => (
+                          <TextField {...params} fullWidth size="small" />
+                        )}
+                      />
+                    )}
+                  </div>
+                </div>
               </Grid>
             </Grid>
           </CardContent>

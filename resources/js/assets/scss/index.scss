@@ -127,6 +127,9 @@ $primary-color: #5048e5;
   &.gap-2 {
     gap: 1rem;
   }
+  &-1 {
+    flex: 1;
+  }
 }
 
 .order-status-option {

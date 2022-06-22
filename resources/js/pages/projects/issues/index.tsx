@@ -4,6 +4,7 @@ import OrderListToolbar from '/@/components/order/OrderListToolbar'
 import { getIssues, Issue } from '/@/api/issue'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '/@/hooks/common'
+import { formatDateToDateDB } from '/@/utils/format'
 
 const OrderPage = () => {
   const params = useParams()
@@ -15,6 +16,8 @@ const OrderPage = () => {
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc')
   const [sortField, setSortField] = useState('updated_at')
   const [status, setStatus] = useState('All')
+  const [date, setDate] = useState<Date | null>(null)
+  const [dateType, setDateType] = useState('')
   const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
@@ -32,6 +35,8 @@ const OrderPage = () => {
         assignee,
         category,
         status,
+        date_type: dateType,
+        date: formatDateToDateDB(date),
       })
       if (isMounted.current) {
         setIssues(response.data)
@@ -55,6 +60,8 @@ const OrderPage = () => {
     category,
     assignee,
     status,
+    dateType,
+    date,
   ])
 
   const handleSort = useCallback(
@@ -69,7 +76,7 @@ const OrderPage = () => {
     [sortField, sortDirection]
   )
 
-  useDebounce(() => fetchOrder(), 350, [searchKey])
+  useDebounce(() => fetchOrder(), 350, [searchKey, dateType, date])
   useEffect(() => {
     isMounted.current = true
     fetchOrder()
@@ -107,6 +114,10 @@ const OrderPage = () => {
           projectKey={params.key!}
           status={status}
           setStatus={setStatus}
+          date={date}
+          setDate={setDate}
+          dateType={dateType}
+          setDateType={setDateType}
         />
         <Box sx={{ mt: 3 }}>
           <IssueList

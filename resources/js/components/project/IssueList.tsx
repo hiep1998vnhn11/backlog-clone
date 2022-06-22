@@ -1,23 +1,20 @@
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 import {
   Box,
   Card,
-  Checkbox,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
-  IconButton,
   CircularProgress,
   TableSortLabel,
 } from '@mui/material'
 import { Issue } from '/@/api/issue'
 import { formatDateOnly, formatDate } from '/@/utils/format'
 import { issuePercent } from '/@/pages/projects/issues/format'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 interface Props {
   issues: Issue[]

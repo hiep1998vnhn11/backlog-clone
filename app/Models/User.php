@@ -10,6 +10,11 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements JWTSubject
 {
+
+    const ROLE_MEMBER = 'member';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_MANAGER = 'manager';
+
     use HasFactory, Notifiable;
     /**
      * The attributes that are mass assignable.
@@ -20,7 +25,8 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'name',
         'password',
-        'avatar'
+        'avatar',
+        'member'
     ];
 
     /**
@@ -65,5 +71,18 @@ class User extends Authenticatable implements JWTSubject
     public function issues()
     {
         return $this->hasMany(Issue::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+    public function isManager()
+    {
+        return $this->role === self::ROLE_MANAGER;
+    }
+    public function hasPermissionCreateProject()
+    {
+        return $this->isAdmin() || $this->isManager();
     }
 }

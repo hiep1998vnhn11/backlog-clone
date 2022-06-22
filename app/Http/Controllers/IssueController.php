@@ -27,6 +27,8 @@ class IssueController extends Controller
         $assignee = $request->assignee ?? '';
         $category = $request->category ?? '';
         $status = $request->status ?? '';
+        $dateType = $request->date_type ?? '';
+        $date = $request->date ?? '';
         $limit = $request->limit ?? 10;
         if (!in_array($status, [
             'All', 'In progress', 'Resolved', 'Closed', 'Not closed',
@@ -61,6 +63,24 @@ class IssueController extends Controller
                         $q->where('issues.status', '!=', 'Closed');
                     } else {
                         $q->where('issues.status', $status);
+                    }
+                }
+            })
+            ->when($dateType, function ($q, $dateType) use ($date) {
+                if ($dateType === 'day') {
+                    if ($date) {
+                        $q->whereDate('issues.start_date', $date);
+                    }
+                } else {
+                    $now = now();
+                    if ($dateType === 'week') {
+                        $monthDay = $now->startOfWeek()->format('Y-m-d');
+                        $q->whereDate('issues.start_date', '>=', $monthDay);
+                    } elseif ($dateType === 'month') {
+                        $monthDay = $now->startOfMonth()->format('Y-m-d');
+                        $q->whereDate('issues.start_date', '>=', $monthDay);
+                    } else if ($dateType === 'today') {
+                        $q->whereDate('issues.start_date', $now->format('Y-m-d'));
                     }
                 }
             })
