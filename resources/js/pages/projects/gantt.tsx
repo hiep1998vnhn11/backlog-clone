@@ -20,23 +20,11 @@ const ShowAccount = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Link className="link icon" to="/accounts">
-          <Icon>
-            <ArrowBack />
-          </Icon>
-          Quản lý tài khoản
-        </Link>
         <Typography sx={{ mb: 3 }} variant="h4">
-          Quản lý tài khoản
+          Gantt chart
         </Typography>
         <Grid container spacing={3}>
-          <Grid item lg={4} md={6} xs={12}>
-            <AccountProfile />
-            <AccountPassword />
-          </Grid>
-          <Grid item lg={8} md={6} xs={12}>
-            <AccountProfileDetails />
-          </Grid>
+          Comming soon
         </Grid>
       </Container>
     </Box>

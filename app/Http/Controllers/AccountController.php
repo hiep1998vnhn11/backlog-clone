@@ -4,8 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
+use App\Models\Activity;
+use App\Models\Issue;
+use App\Models\Member;
+use App\Models\Project;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
 class AccountController extends Controller
@@ -91,9 +97,44 @@ class AccountController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $account)
     {
-        //
+        $member = $account;
+        $issues = Issue::query()
+            ->where('assignee_id', $member->id)
+            ->select('tracker', DB::raw("SUM(status != 'Closed') as open"), DB::raw("SUM(status = 'Closed') as closed"))
+            ->groupBy('tracker')
+            ->get();
+        $member->issue_tracking = $issues;
+
+        $projects = Project::query()
+            ->join('members', 'members.project_id', '=', 'projects.id')
+            ->where('members.user_id', $member->id)
+            ->where('members.status', Member::STATUS_JOINED)
+            ->select(
+                'members.created_at as joined_at',
+                'projects.name',
+                'projects.key',
+                'projects.created_at'
+            )
+            ->get();
+        $member->related_projects = $projects;
+
+        $activities = Activity::query()
+            ->select(
+                'activities.*',
+                'users.name as user_name',
+            )
+            ->leftJoin('users', 'activities.user_id', '=', 'users.id')
+            ->where('activities.user_id', $member->id)
+            ->orderBy('activities.created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->groupBy(function ($item) {
+                return Carbon::parse($item->created_at)->format('Y-m-d');
+            });
+        $member->related_activities = $activities;
+        return $this->sendRespondSuccess($member);
     }
 
     /**

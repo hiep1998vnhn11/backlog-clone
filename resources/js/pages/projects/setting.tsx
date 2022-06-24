@@ -329,7 +329,14 @@ const Settings = () => {
               ) : (
                 members.map((member) => (
                   <StyledTableRow key={member.id}>
-                    <TableCell>{member.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/projects/${params.key}/members/${member.id}`}
+                        className="link"
+                      >
+                        {member.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell>
                       <Chip

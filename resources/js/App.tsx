@@ -5,6 +5,7 @@ import IndexPage from './pages/index'
 import LoginPage from './pages/login'
 import RegisterPage from './pages/register'
 import AccountPage from './pages/account'
+import AccountDetailPage from './pages/account/id'
 import AccountsPage from './pages/accounts'
 import ProjectPage from './pages/projects'
 import ProjectAddIssuePage from './pages/projects/add'
@@ -61,6 +62,10 @@ function App() {
                     <Routes>
                       <Route path="/" element={<IndexPage />} />
                       <Route path="/account" element={<AccountPage />} />
+                      <Route
+                        path="/account/:id"
+                        element={<AccountDetailPage />}
+                      />
                       <Route path="/accounts" element={<AccountsPage />} />
                       <Route path="/projects/:key" element={<ProjectPage />} />
                       <Route

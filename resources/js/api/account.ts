@@ -2,8 +2,13 @@ import type { User } from './models/authModel'
 import { defHttp } from '/@/utils/http'
 import { RoleEnum } from '/@/enums/roleEnum'
 import { AccountCompress } from './models/accountModel'
+import { Member } from './member'
 const indexApi = '/account'
 
+export const getAccountDetail = (id: string | number) =>
+  defHttp.get<Member>({
+    url: `${indexApi}/${id}`,
+  })
 export const getAccounts = (params: any) =>
   defHttp.get<{
     data: User[]

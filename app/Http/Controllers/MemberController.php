@@ -83,7 +83,7 @@ class MemberController extends Controller
         $member = Member::create([
             'project_id' => $project->id,
             'user_id' => $user->id,
-            'status' => Member::STATUS_INVITED,
+            'status' => Member::STATUS_JOINED,
         ]);
 
         Activity::create([

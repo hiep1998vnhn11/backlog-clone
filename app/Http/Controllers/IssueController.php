@@ -74,11 +74,15 @@ class IssueController extends Controller
                 } else {
                     $now = now();
                     if ($dateType === 'week') {
-                        $monthDay = $now->startOfWeek()->format('Y-m-d');
-                        $q->whereDate('issues.start_date', '>=', $monthDay);
+                        $monDay = $now->startOfWeek()->format('Y-m-d');
+                        $sunday = $now->endOfWeek()->format('Y-m-d');
+                        $q->whereDate('issues.start_date', '>=', $monDay)
+                            ->whereDate('issues.start_date', '<=', $sunday);
                     } elseif ($dateType === 'month') {
                         $monthDay = $now->startOfMonth()->format('Y-m-d');
-                        $q->whereDate('issues.start_date', '>=', $monthDay);
+                        $endMonth = $now->endOfMonth()->format('Y-m-d');
+                        $q->whereDate('issues.start_date', '>=', $monthDay)
+                            ->whereDate('issues.start_date', '<=', $endMonth);
                     } else if ($dateType === 'today') {
                         $q->whereDate('issues.start_date', $now->format('Y-m-d'));
                     }

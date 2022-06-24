@@ -302,9 +302,9 @@ const AccountistResults: React.FC<Props> = ({
                         <Avatar src={customer.avatar || ''} sx={{ mr: 2 }}>
                           {getInitials(customer.name)}
                         </Avatar>
-                        <Typography color="textPrimary" variant="body1">
+                        <Link to={`/account/${customer.id}`} className="link">
                           {customer.name}
-                        </Typography>
+                        </Link>
                       </Box>
                     </TableCell>
                     <TableCell>{customer.email}</TableCell>
