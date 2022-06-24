@@ -47,7 +47,6 @@ interface Props {
 
 const roleColors: any = {
   admin: 'primary',
-  manager: 'secondary',
   shipper: 'info',
 }
 const AccountistResults: React.FC<Props> = ({
@@ -318,7 +317,7 @@ const AccountistResults: React.FC<Props> = ({
                     </TableCell>
                     <TableCell>{formatDateOnly(customer.created_at)}</TableCell>
                     <TableCell>
-                      <Tooltip title="Sửa tài khoản">
+                      <Tooltip title="Edit account">
                         <IconButton
                           aria-label="delete"
                           color="success"
@@ -328,7 +327,7 @@ const AccountistResults: React.FC<Props> = ({
                         </IconButton>
                       </Tooltip>
 
-                      <Tooltip title="Xoá tài khoản">
+                      <Tooltip title="Delete account">
                         <IconButton
                           aria-label="delete"
                           color="error"

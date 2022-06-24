@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Project;
 
-use App\Models\User;
+use App\Models\Member;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateAccountRequest extends FormRequest
+class UpdateMemberRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,7 @@ class CreateAccountRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|min:4|confirmed',
-            'role' => 'required|in:' . User::ROLE_ADMIN . ',' . User::ROLE_MEMBER,
+            'role' => 'required|in:' . Member::ROLE_MANAGER . ',' . Member::ROLE_MEMBER,
         ];
     }
 }

@@ -12,6 +12,12 @@ import {
   TextField,
   IconButton,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  SelectChangeEvent,
+  MenuItem,
+  FormHelperText,
 } from '@mui/material'
 import Dialog from '/@/components/Dialog'
 import {
@@ -21,13 +27,31 @@ import {
   deleteCategory,
   updateCategory,
 } from '/@/api/category'
-import { getMembers, Member, deleteMember, createMember } from '/@/api/member'
+import {
+  getMembers,
+  Member,
+  deleteMember,
+  createMember,
+  updateMember,
+} from '/@/api/member'
+import { showProjectCompact } from '/@/api/project'
+import Page404 from '/@/pages/404'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { formatDateOnly } from '/@/utils/format'
 import useApp from '/@/context/useApp'
 import { styled } from '@mui/material/styles'
-
+import GeneralTab from './tab/general'
+import FaceIcon from '@mui/icons-material/Face'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import SupportAgentIcon from '@mui/icons-material/SupportAgent'
+import { RoleEnum } from '/@/enums/roleEnum'
+import { Project } from '/@/api/models/projectModel'
+const roleColors: any = {
+  admin: 'primary',
+  manager: 'secondary',
+  shipper: 'info',
+}
 interface TabPanelProps {
   children?: React.ReactNode
   index: number
@@ -66,6 +90,7 @@ function TabPanel(props: TabPanelProps) {
 
 const Settings = () => {
   const { createConfirmModal, toastSuccess, toastError } = useApp()
+  const [searchParams] = useSearchParams()
   const dialogState = useRef({
     type: 'category',
     title: 'New Category',
@@ -74,32 +99,63 @@ const Settings = () => {
   const params = useParams()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loadingProject, setLoadingProject] = useState(false)
   const [loadingCategory, setLoadingCategory] = useState(false)
   const toggleOpen = useCallback(() => setOpen((value) => !value), [])
-  const [tab, setTab] = useState(1)
+  const [tab, setTab] = useState(() => {
+    const tab = searchParams.get('t')
+    if (tab === 'member') return 1
+    if (tab === 'category') return 2
+    return 0
+  })
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState('')
   const [description, setDescription] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
   const [members, setMembers] = useState<Member[]>([])
+  const [role, setRole] = useState<RoleEnum>(RoleEnum.MEMBER)
   const isMounted = useRef(false)
+  const [project, setProject] = useState<Project | null>(null)
+  const isMember = useMemo(() => {
+    if (!project) return true
+    return ![RoleEnum.ADMIN, RoleEnum.MANAGER].includes(project.role)
+  }, [project])
+  const fetchProject = useCallback(async (projectKey: string) => {
+    try {
+      setLoadingProject(true)
+      const response = await showProjectCompact(projectKey)
+      if (isMounted.current) {
+        setProject(response)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoadingProject(false)
+    }
+  }, [])
   useEffect(() => {
     if (!isMounted.current) {
       isMounted.current = true
+      fetchProject(params.key!)
       handleChangeTab(undefined, tab)
     }
 
     return () => {
       isMounted.current = false
     }
-  }, [])
+  }, [params.key])
 
   const handleNameChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setName(event.target.value)
+      setNameError('')
     },
     []
   )
+  const handleRoleChange = useCallback((event: SelectChangeEvent<RoleEnum>) => {
+    setRole(event.target.value as RoleEnum)
+    setNameError('')
+  }, [])
   const handleDescriptionChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setDescription(event.target.value)
@@ -128,6 +184,7 @@ const Settings = () => {
       setLoadingCategory(false)
     }
   }, [])
+
   const handleChangeTab = useCallback(
     (_: any, newValue: number) => {
       if (newValue === 2 && !categories.length) fetchCategory()
@@ -159,6 +216,7 @@ const Settings = () => {
   const handleCreateInviteMember = useCallback(async () => {
     try {
       setLoading(true)
+      setNameError('')
       await createMember({
         email: name,
         project_key: params.key!,
@@ -176,6 +234,30 @@ const Settings = () => {
       setLoading(false)
     }
   }, [name, params.key])
+  const handleUpdateMemberMember = useCallback(async () => {
+    try {
+      setNameError('')
+      setLoading(true)
+      await updateMember(dialogState.current.id, {
+        role,
+        project_key: params.key!,
+      })
+      setMembers((members) =>
+        members.map((member) =>
+          member.id === dialogState.current.id ? { ...member, role } : member
+        )
+      )
+      setRole(RoleEnum.MEMBER)
+      toggleOpen()
+      toastSuccess('Update Member successfully')
+    } catch (error: any) {
+      const errors = error.data.errors
+      setNameError(errors ? errors.role?.[0] : 'Can not set role!')
+    } finally {
+      setLoading(false)
+    }
+  }, [role, params.key])
+
   const handleUpdateCategory = useCallback(async () => {
     try {
       setLoading(true)
@@ -232,13 +314,30 @@ const Settings = () => {
       },
     })
   }, [])
+
+  const onMemberEdit = useCallback((member: Member) => {
+    dialogState.current.title = 'Member: ' + member.name
+    dialogState.current.id = member.id
+    dialogState.current.type = 'edit_member'
+    setRole(member.role)
+    toggleOpen()
+  }, [])
+
+  const getAccountIcon = useCallback((roleName: string) => {
+    if (roleName === 'admin') return <AdminPanelSettingsIcon />
+    if (roleName === 'manager') return <SupportAgentIcon />
+    return <FaceIcon />
+  }, [])
+
   const handleConfirmDialog = useCallback(() => {
     if (dialogState.current.type === 'category') {
       if (dialogState.current.id) return handleUpdateCategory()
       return handleCreateCategory()
     }
-    return handleCreateInviteMember()
-  }, [handleCreateCategory, handleUpdateCategory])
+    if (dialogState.current.type === 'invite') return handleCreateInviteMember()
+
+    return handleUpdateMemberMember()
+  }, [handleCreateCategory, handleUpdateCategory, handleUpdateMemberMember])
   const onEditCategory = useCallback((category: Category) => {
     dialogState.current.title = 'Category: ' + category.name
     dialogState.current.id = category.id
@@ -263,6 +362,7 @@ const Settings = () => {
     toggleOpen()
   }, [])
   const primaryButtonMarkup = () => {
+    if (isMember) return null
     if (tab === 2)
       return (
         <Button
@@ -284,6 +384,9 @@ const Settings = () => {
         </Button>
       )
   }
+
+  if (loadingProject) return 'loading'
+  if (!project) return <Page404 />
   return (
     <Box component="main" sx={{ p: 2 }}>
       <Typography variant="h4">Project settings</Typography>
@@ -308,7 +411,7 @@ const Settings = () => {
           <div>{primaryButtonMarkup()}</div>
         </Box>
         <TabPanel value={tab} index={0}>
-          <Button>Add Category</Button>
+          <GeneralTab project={project} isMember={isMember} />
         </TabPanel>
         <TabPanel value={tab} index={1}>
           <Table aria-label="simple table">
@@ -318,7 +421,7 @@ const Settings = () => {
                 <TableCell>Email</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Joined on</TableCell>
-                <TableCell align="right">Action</TableCell>
+                {!isMember && <TableCell align="right">Action</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -340,21 +443,31 @@ const Settings = () => {
                     <TableCell>{member.email}</TableCell>
                     <TableCell>
                       <Chip
-                        label={member.status}
-                        color={
-                          member.status === 'joined' ? 'success' : 'default'
-                        }
-                      ></Chip>
+                        icon={getAccountIcon(member.role)}
+                        label={member.role}
+                        variant="outlined"
+                        color={roleColors[member.role]}
+                      />
                     </TableCell>
                     <TableCell>{formatDateOnly(member.joined_at)}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="error"
-                        onClick={() => onMemberDelete(member.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
+                    {!isMember && (
+                      <TableCell align="right">
+                        <IconButton
+                          aria-label="delete"
+                          color="success"
+                          onClick={() => onMemberEdit(member)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+
+                        <IconButton
+                          color="error"
+                          onClick={() => onMemberDelete(member.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    )}
                   </StyledTableRow>
                 ))
               )}
@@ -368,7 +481,7 @@ const Settings = () => {
                 <TableCell>Category</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Created date</TableCell>
-                <TableCell align="right">Action</TableCell>
+                {!isMember && <TableCell align="right">Action</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -382,20 +495,22 @@ const Settings = () => {
                     <TableCell>{category.name}</TableCell>
                     <TableCell>{category.description}</TableCell>
                     <TableCell>{formatDateOnly(category.created_at)}</TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="success"
-                        onClick={() => onEditCategory(category)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => onCategoryDelete(category.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
+                    {!isMember && (
+                      <TableCell align="right">
+                        <IconButton
+                          color="success"
+                          onClick={() => onEditCategory(category)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => onCategoryDelete(category.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    )}
                   </StyledTableRow>
                 ))
               )}
@@ -404,60 +519,84 @@ const Settings = () => {
         </TabPanel>
       </Box>
 
-      <Dialog
-        open={open}
-        onClose={toggleOpen}
-        title={dialogState.current.title}
-        cancelText="Cancel"
-        confirmText={
-          dialogState.current.type === 'category' ? 'Save' : 'Invite'
-        }
-        onConfirm={handleConfirmDialog}
-        loading={loading}
-      >
-        <Box sx={{ width: '600px' }}>
-          <TextField
-            fullWidth
-            required
-            label={
-              dialogState.current.type === 'category'
-                ? 'Category name'
-                : 'Email'
-            }
-            margin="normal"
-            name="name"
-            onChange={handleNameChange}
-            value={name}
-            size="small"
-            variant="outlined"
-            error={!!nameError}
-            helperText={nameError}
-          />
-          {dialogState.current.type === 'category' && (
-            <>
-              <Typography variant="body2" sx={{ color: '#666' }}>
-                Name of category; generally it set to issue.
-                <br />
-                category can be defined in each project.
-                <br />
-                e.g. "Subsystem A", "Research", "Design", and so on.
-              </Typography>
+      {!isMember && (
+        <Dialog
+          open={open}
+          onClose={toggleOpen}
+          title={dialogState.current.title}
+          cancelText="Cancel"
+          confirmText={
+            dialogState.current.type === 'category'
+              ? 'Save'
+              : dialogState.current.type === 'invite'
+              ? 'Invite'
+              : 'Save'
+          }
+          onConfirm={handleConfirmDialog}
+          loading={loading}
+        >
+          <Box sx={{ width: '600px' }}>
+            {dialogState.current.type !== 'edit_member' ? (
               <TextField
                 fullWidth
-                label="Category description"
+                required
+                label={
+                  dialogState.current.type === 'category'
+                    ? 'Category name'
+                    : 'Email'
+                }
                 margin="normal"
-                name="description"
-                onChange={handleDescriptionChange}
-                value={description}
+                name="name"
+                onChange={handleNameChange}
+                value={name}
                 size="small"
                 variant="outlined"
-                multiline
-                rows={4}
+                error={!!nameError}
+                helperText={nameError}
               />
-            </>
-          )}
-        </Box>
-      </Dialog>
+            ) : (
+              <FormControl fullWidth error={!!nameError}>
+                <InputLabel id="role-select-small">Role</InputLabel>
+                <Select
+                  labelId="role-select-small"
+                  id="role-select-small"
+                  value={role}
+                  label="Role"
+                  onChange={handleRoleChange}
+                  name="role"
+                >
+                  <MenuItem value={RoleEnum.MANAGER}>Manager</MenuItem>
+                  <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
+                </Select>
+                <FormHelperText>{nameError}</FormHelperText>
+              </FormControl>
+            )}
+            {dialogState.current.type === 'category' && (
+              <>
+                <Typography variant="body2" sx={{ color: '#666' }}>
+                  Name of category; generally it set to issue.
+                  <br />
+                  category can be defined in each project.
+                  <br />
+                  e.g. "Subsystem A", "Research", "Design", and so on.
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Category description"
+                  margin="normal"
+                  name="description"
+                  onChange={handleDescriptionChange}
+                  value={description}
+                  size="small"
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                />
+              </>
+            )}
+          </Box>
+        </Dialog>
+      )}
     </Box>
   )
 }

@@ -1,5 +1,4 @@
 import { defHttp } from '/@/utils/http'
-import { StatusEnum, RoleEnum } from '/@/enums/roleEnum'
 import { Project } from './models/projectModel'
 const indexApi = '/project'
 
@@ -7,6 +6,12 @@ interface CreateOrderData {
   name: string
   key: string
   description?: string | null
+}
+interface UpdateOrderData {
+  name: string
+  key: string
+  description?: string | null
+  id: number
 }
 
 export const getProjects = (params: any) =>
@@ -17,6 +22,11 @@ export const getProjects = (params: any) =>
   }>({
     url: indexApi,
     params,
+  })
+
+export const showProjectCompact = (projectKey: string) =>
+  defHttp.get<Project>({
+    url: `${indexApi}/${projectKey}/compact`,
   })
 
 export const showProject = (projectKey: string) =>
@@ -35,17 +45,7 @@ export const createProject = (data: CreateOrderData) =>
     data,
   })
 
-export const updateOrder = (data: {
-  username: string
-  password: string
-  name: string
-  phone: string
-  password_confirmation: string
-  address: string
-  role: RoleEnum
-  status: StatusEnum
-  id: number
-}) =>
+export const updateProject = (data: UpdateOrderData) =>
   defHttp.put({
     url: indexApi + '/' + data.id,
     data,

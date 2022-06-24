@@ -18,7 +18,7 @@ class ActivityController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $searchKey = $request->search_key ?? '';
         $assignee = $request->assignee ?? '';
         $category = $request->category ?? '';

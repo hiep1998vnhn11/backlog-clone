@@ -331,7 +331,6 @@ const Customers = () => {
                   name="role"
                 >
                   <MenuItem value={RoleEnum.ADMIN}>Admin</MenuItem>
-                  <MenuItem value={RoleEnum.MANAGER}>Manager</MenuItem>
                   <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
                 </Select>
               </FormControl>

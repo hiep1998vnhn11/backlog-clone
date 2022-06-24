@@ -51,7 +51,7 @@ const ProjectMemberPage: React.FC<Props> = ({
           endIcon={<ArrowRightIcon fontSize="small" />}
           size="small"
           LinkComponent={Link}
-          to={`/projects/${projectKey}/setting?_t=member`}
+          to={`/projects/${projectKey}/setting?t=member`}
         >
           All members
         </Button>

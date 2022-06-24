@@ -1,3 +1,4 @@
+import { RoleEnum } from '/@/enums/roleEnum'
 import { defHttp } from '/@/utils/http'
 import { CategoryModel, CategoryPluckModel } from './models/categoryModel'
 const indexApi = '/member'
@@ -12,7 +13,7 @@ export interface Member {
   status: string
   joined_at: string
   avatar: string
-  role: string
+  role: RoleEnum
   issue_tracking: any[]
   related_projects: RelatedProject[]
   related_activities: Record<string, Activity[]>
@@ -63,13 +64,13 @@ export const getMember = (id: string | number, projectKey: string) =>
     },
   })
 
-export const activeCategory = (params: { id: number; isActive?: boolean }) =>
-  defHttp.post({
-    url: indexApi + '/' + params.id + '/active',
-    params,
-  })
-
-export const updateIssue = (id: number, data: UpdateIssueData) =>
+export const updateMember = (
+  id: number,
+  data: {
+    project_key: string
+    role: RoleEnum
+  }
+) =>
   defHttp.put<CategoryModel>({
     url: indexApi + '/' + id,
     data,

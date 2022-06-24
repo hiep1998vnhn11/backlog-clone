@@ -59,7 +59,29 @@ class Project extends Model
             ->get();
     }
 
+    public function getCurrentMemberRole()
+    {
+        if (auth()->user()->isAdmin()) return Member::ROLE_MANAGER;
+        if ($this->user_id == auth()->id()) return Member::ROLE_MANAGER;
+        $member = $this->members()
+            ->select('role')
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+        return $member->role;
+    }
+
     public function hasPermissionCreateIssue(User $user)
+    {
+        if ($this->user_id === $user->id || $user->role === User::ROLE_ADMIN) return true;
+        $member = $this->members()
+            ->where('user_id', $user->id)
+            ->where('role', Member::ROLE_MANAGER)
+            ->first();
+        if ($member) return true;
+        return false;
+    }
+
+    public function hasPermissionShowIssue(User $user)
     {
         if ($this->user_id === $user->id || $user->role === User::ROLE_ADMIN) return true;
         $member = $this->members()

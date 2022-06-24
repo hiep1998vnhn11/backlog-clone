@@ -8,15 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Member extends Model
 {
     use HasFactory;
-
-    const STATUS_INVITED = 'invited';
-    const STATUS_JOINED = 'joined';
+    const ROLE_MEMBER = 'member';
+    const ROLE_MANAGER = 'manager';
 
     protected $fillable = [
         'user_id',
         'project_id',
-        'status',
-        'status',
+        'role',
         'joined_at'
     ];
 

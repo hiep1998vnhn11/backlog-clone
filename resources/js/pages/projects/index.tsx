@@ -73,9 +73,14 @@ const ProjectPage = () => {
                 </Typography>
               )}
             </Box>
-            <IssueTracking sx={{ mb: 2 }} issues={project.issue_tracking} />
+            <IssueTracking
+              sx={{ mb: 2 }}
+              issues={project.issue_tracking}
+              projectKey={project.key!}
+            />
             <TimeTracking
               estimateTime={project.estimate_time}
+              projectKey={project.key!}
               spentTime={project.spent_time}
             />
           </Grid>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\CreateCategoryRequest;
 use App\Http\Requests\Project\CreateProjectRequest;
+use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Models\Activity;
 use App\Models\Issue;
 use App\Models\Member;
@@ -27,8 +28,7 @@ class ProjectController extends Controller
         $user = auth()->user();
         if ($user->role != User::ROLE_ADMIN) {
             $query = $query->join('members', 'projects.id', '=', 'members.project_id')
-                ->where('members.user_id', auth()->id())
-                ->where('members.status', Member::STATUS_JOINED);
+                ->where('members.user_id', auth()->id());
         }
         $query =  $query->paginate($request->limit ?? 12);
         return $this->sendRespondSuccess(
@@ -44,7 +44,6 @@ class ProjectController extends Controller
      */
     public function store(CreateProjectRequest $request)
     {
-        if (!auth()->user()->hasPermissionCreateProject()) return $this->sendForbidden();
         $project = Project::create(
             array_merge($request->validated(), [
                 'user_id' => auth()->id(),
@@ -53,8 +52,8 @@ class ProjectController extends Controller
         Member::create([
             'user_id' => auth()->id(),
             'project_id' => $project->id,
-            'status' => Member::STATUS_JOINED,
             'joined_at' => now(),
+            'role' => Member::ROLE_MANAGER,
         ]);
 
         Activity::create([
@@ -77,8 +76,7 @@ class ProjectController extends Controller
     public function show(string $project)
     {
         $project = Project::where('key', $project)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
-
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $issues = Issue::query()
             ->where('project_id', $project->id)
             ->select('tracker', DB::raw("SUM(status != 'Closed') as open"), DB::raw("SUM(status = 'Closed') as closed"))
@@ -98,8 +96,15 @@ class ProjectController extends Controller
         $project->joined_members = $project->members()
             ->select('users.id', 'users.name')
             ->join('users', 'users.id', '=', 'members.user_id')
-            ->where('members.status', Member::STATUS_JOINED)
             ->get();
+        return $this->sendRespondSuccess($project);
+    }
+
+    public function compact(string $project)
+    {
+        $project = Project::where('key', $project)->firstOrFail();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
+        $project->role = $project->getCurrentMemberRole();
         return $this->sendRespondSuccess($project);
     }
 
@@ -110,9 +115,11 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $project->update($request->validated());
+        return $this->sendRespondSuccess($project->key);
     }
 
     /**
@@ -121,9 +128,11 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $project)
     {
-        //
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $project->delete();
+        return $this->sendRespondSuccess();
     }
 
     public function pluck(Request $request)
@@ -133,7 +142,6 @@ class ProjectController extends Controller
         $projects = Project::select('projects.name', 'projects.key')
             ->join('members', 'members.project_id', '=', 'projects.id')
             ->where('members.user_id', auth()->id())
-            ->where('members.status', Member::STATUS_JOINED)
             ->when($searchKey, function ($q, $searchKey) {
                 $q->where('name', 'like', '%' . $searchKey . '%')
                     ->orWhere('key', 'like', '%' . $searchKey . '%');
@@ -144,6 +152,7 @@ class ProjectController extends Controller
     public function memberAndCategory(string $projectKey)
     {
         $project = Project::where('key', $projectKey)->firstOrFail();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $members = $project->getAllMembers();
         $categories = $project->issueCategories()->select('name as label', 'id as value')->get();
         return $this->sendRespondSuccess(
@@ -156,6 +165,7 @@ class ProjectController extends Controller
     public function storeCategory(string $projectKey, CreateCategoryRequest $request)
     {
         $project = Project::where('key', $projectKey)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $project->issueCategories()->create($request->validated());
         return $this->sendRespondSuccess($request->key);
     }

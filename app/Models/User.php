@@ -82,11 +82,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->role === self::ROLE_MANAGER;
     }
-    public function hasPermissionCreateProject()
-    {
-        return $this->isAdmin() || $this->isManager();
-    }
-
     public function hasAnyRole(array $roles)
     {
         return in_array($this->role, $roles);

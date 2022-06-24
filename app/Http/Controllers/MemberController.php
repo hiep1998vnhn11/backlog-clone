@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Project\InviteMemberRequest;
+use App\Http\Requests\Project\UpdateMemberRequest;
 use App\Models\Activity;
 use App\Models\Issue;
 use App\Models\Member;
@@ -23,9 +24,9 @@ class MemberController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $searchKey = $request->search_key ?? '';
-        $status = $request->status ?? '';
+        $role = $request->role ?? '';
         $members = Member::query()
             ->join('users', 'users.id', '=', 'members.user_id')
             ->where('project_id', $project->id)
@@ -33,15 +34,16 @@ class MemberController extends Controller
                 $q->where('users.name', 'like', "%{$searchKey}%")
                     ->orWhere('users.email', 'like', "%{$searchKey}%");
             })
-            ->when($status, function ($q) use ($status) {
-                $q->where('members.status', $status);
+            ->when($role, function ($q) use ($role) {
+                $q->where('members.role', $role);
             })
             ->select(
                 'users.id',
                 'users.name',
                 'users.email',
-                'members.status',
+                'members.role',
                 'members.created_at',
+                'members.joined_at',
                 'users.avatar'
             )
             ->get();
@@ -83,7 +85,7 @@ class MemberController extends Controller
         $member = Member::create([
             'project_id' => $project->id,
             'user_id' => $user->id,
-            'status' => Member::STATUS_JOINED,
+            'joined_at' => Carbon::now(),
         ]);
 
         Activity::create([
@@ -110,12 +112,11 @@ class MemberController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $member = User::select('users.*')
             ->join('members', 'members.user_id', '=', 'users.id')
             ->where('members.project_id', $project->id)
             ->where('users.id', $id)
-            ->where('members.status', Member::STATUS_JOINED)
             ->firstOrFail();
 
         $issues = Issue::query()
@@ -128,7 +129,6 @@ class MemberController extends Controller
         $projects = Project::query()
             ->join('members', 'members.project_id', '=', 'projects.id')
             ->where('members.user_id', $member->id)
-            ->where('members.status', Member::STATUS_JOINED)
             ->select(
                 'members.created_at as joined_at',
                 'projects.name',
@@ -173,9 +173,16 @@ class MemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateMemberRequest $request, Member $member)
     {
-        //
+        if (!$request->project_key) return $this->sendRespondError();
+        $project = Project::where('key', $request->project_key)->firstOrFail();
+        if (!$member->project_id == $project->id) return $this->sendForbidden();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $user = User::findOrFail($member->user_id);
+        $member->role = $request->role;
+        $member->save();
+        return $this->sendRespondSuccess();
     }
 
     /**

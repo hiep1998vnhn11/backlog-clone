@@ -8,17 +8,11 @@ import {
   SvgIcon,
   Typography,
 } from '@mui/material'
-import { Download as DownloadIcon } from '../../icons/download'
-import { Search as SearchIcon } from '../../icons/search'
-import { Upload as UploadIcon } from '../../icons/upload'
-import useAuth from '/@/context/useAuth'
-import { RoleEnum } from '/@/enums/roleEnum'
 
 interface Props {
   toggleOpen: () => void
 }
 const ProjectToolbar: React.FC<Props> = ({ toggleOpen }) => {
-  const { user } = useAuth()
   return (
     <Box>
       <Box
@@ -34,11 +28,9 @@ const ProjectToolbar: React.FC<Props> = ({ toggleOpen }) => {
           Projects
         </Typography>
         <Box sx={{ m: 1 }}>
-          {user?.role !== RoleEnum.MEMBER && (
-            <Button color="primary" variant="contained" onClick={toggleOpen}>
-              Create new Project
-            </Button>
-          )}
+          <Button color="primary" variant="contained" onClick={toggleOpen}>
+            Create new Project
+          </Button>
         </Box>
       </Box>
     </Box>

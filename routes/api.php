@@ -48,6 +48,7 @@ Route::group(
         Route::get('/issue/{issue}/spents', [IssueController::class, 'spents']);
 
         Route::resource('account', AccountController::class)->middleware('role:admin');
+        Route::get('/project/{project}/compact', [ProjectController::class, 'compact']);
         Route::resource('/project', ProjectController::class);
         Route::resource('/category', CategoryController::class);
         Route::resource('/issue', IssueController::class);

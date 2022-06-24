@@ -15,10 +15,8 @@ import {
   SelectChangeEvent,
 } from '@mui/material'
 import { Search as SearchIcon } from '../../icons/search'
-import { Upload as UploadIcon } from '../../icons/upload'
-import { Download as DownloadIcon } from '../../icons/download'
 import React, { useCallback, useState } from 'react'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { RoleEnum } from '/@/enums/roleEnum'
 
 interface Props {
   searchKey: string
@@ -101,9 +99,8 @@ const AccountListToolbar: React.FC<Props> = ({
                     onChange={handleRoleChange}
                   >
                     <MenuItem value="">Tất cả</MenuItem>
-                    <MenuItem value="shipper">shipper</MenuItem>
-                    <MenuItem value="agent">Agent</MenuItem>
-                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
+                    <MenuItem value={RoleEnum.ADMIN}>Admin</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

@@ -4,11 +4,13 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 interface Props {
   estimateTime: number
   spentTime: number
+  projectKey: string
   [key: string]: any
 }
 const TimeTracking: React.FC<Props> = ({
   estimateTime,
   spentTime,
+  projectKey,
   ...props
 }) => {
   return (
@@ -39,6 +41,8 @@ const TimeTracking: React.FC<Props> = ({
           color="primary"
           endIcon={<ArrowRightIcon fontSize="small" />}
           size="small"
+          LinkComponent={Link}
+          to={`/projects/${projectKey}/spents`}
         >
           Log time
         </Button>

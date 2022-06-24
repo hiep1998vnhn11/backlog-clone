@@ -19,7 +19,7 @@ class SpentTimeController extends Controller
     {
         if (!$request->project_key) return $this->sendRespondError();
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $sortBy = $request->sort_by ?? 'updated_at';
         $sortType = $request->sort_type ?? 'desc';
         $user = $request->user ?? '';
@@ -88,7 +88,7 @@ class SpentTimeController extends Controller
     public function store(CreateSpentTimeRequest $request)
     {
         $project = Project::where('key', $request->project_key)->firstOrFail();
-        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $issue = $project->issues()->where('id', $request->issue_id)->firstOrFail();
 
         $spent = SpentTime::create(array_merge(

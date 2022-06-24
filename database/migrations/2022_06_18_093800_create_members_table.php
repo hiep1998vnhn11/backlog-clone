@@ -17,7 +17,7 @@ class CreateMembersTable extends Migration
             $table->id();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('status')->default('pending');
+            $table->string('role')->default('member');
             $table->timestamp('joined_at')->nullable();
             $table->timestamps();
         });

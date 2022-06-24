@@ -52,7 +52,7 @@ class AccountController extends Controller
                 });
             })
             ->when($role, function ($query, $role) {
-                return $query->role($role);
+                return $query->where('role', $role);
             });
         $accounts = $query
             ->orderBy($sortBy, $sortType)
@@ -110,7 +110,6 @@ class AccountController extends Controller
         $projects = Project::query()
             ->join('members', 'members.project_id', '=', 'projects.id')
             ->where('members.user_id', $member->id)
-            ->where('members.status', Member::STATUS_JOINED)
             ->select(
                 'members.created_at as joined_at',
                 'projects.name',

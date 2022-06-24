@@ -16,9 +16,15 @@ import type { IssueTracking } from '/@/api/models/projectModel'
 interface Props {
   issues: IssueTracking[]
   showFooter?: boolean
+  projectKey: string
   [key: string]: any
 }
-const IssueTrackingFC: React.FC<Props> = ({ issues, showFooter, ...props }) => {
+const IssueTrackingFC: React.FC<Props> = ({
+  issues,
+  showFooter,
+  projectKey,
+  ...props
+}) => {
   return (
     <Card {...props}>
       <CardHeader title="Issues tracking" />
@@ -69,6 +75,8 @@ const IssueTrackingFC: React.FC<Props> = ({ issues, showFooter, ...props }) => {
               color="primary"
               endIcon={<ArrowRightIcon fontSize="small" />}
               size="small"
+              LinkComponent={Link}
+              to={`/projects/${projectKey}/gantt-chart`}
             >
               Gantt chart
             </Button>
@@ -76,6 +84,8 @@ const IssueTrackingFC: React.FC<Props> = ({ issues, showFooter, ...props }) => {
               color="primary"
               endIcon={<ArrowRightIcon fontSize="small" />}
               size="small"
+              LinkComponent={Link}
+              to={`/projects/${projectKey}/issues`}
             >
               View all issues
             </Button>
