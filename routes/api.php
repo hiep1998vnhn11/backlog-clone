@@ -4,8 +4,10 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SpentTimeController;
@@ -43,9 +45,11 @@ Route::group(
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::post('/change-info', [AuthController::class, 'changeInfo']);
         Route::get('/project/{projectKey}/memberAndCategory', [ProjectController::class, 'memberAndCategory']);
+        Route::get('/project/{projectKey}/searchMemberForInvite', [ProjectController::class, 'searchMemberForInvite']);
 
         Route::get('/project/pluck', [ProjectController::class, 'pluck']);
         Route::get('/issue/{issue}/spents', [IssueController::class, 'spents']);
+        Route::get('/issue/{issue}/comments', [IssueController::class, 'comments']);
 
         Route::resource('account', AccountController::class)->middleware('role:admin');
         Route::get('/project/{project}/compact', [ProjectController::class, 'compact']);
@@ -55,5 +59,7 @@ Route::group(
         Route::resource('/member', MemberController::class);
         Route::resource('/activity', ActivityController::class);
         Route::resource('/spent', SpentTimeController::class);
+        Route::post('/comment', [CommentController::class, 'store']);
+        Route::get('/notification', [NotificationController::class, 'index']);
     }
 );

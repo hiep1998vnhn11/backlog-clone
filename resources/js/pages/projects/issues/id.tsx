@@ -9,17 +9,75 @@ import {
   Tab,
   Tabs,
   Typography,
+  CircularProgress,
+  TextField,
+  Avatar,
 } from '@mui/material'
 import Page404 from '../../404'
-import { Issue, getIssue, getIssueSpents } from '/@/api/issue'
+import {
+  Issue,
+  getIssue,
+  getIssueSpents,
+  getIssueComments,
+  Comment,
+  createComment,
+} from '/@/api/issue'
 import { IssueStatus, IssuePercentComplete } from './format'
 import { getRelativeTime, formatDateOnly } from '/@/utils/format'
 import { SpentTime } from '/@/api/spent'
+import useApp from '/@/context/useApp'
+import { LoadingButton } from '@mui/lab'
+import useAuth from '/@/context/useAuth'
+import { UserCircle as UserCircleIcon } from '/@/icons/user-circle'
 
 interface TabPanelProps {
   children?: React.ReactNode
   index: number
   value: number
+}
+
+function CommentComponent({
+  comment,
+  projectKey,
+}: {
+  comment: Comment
+  projectKey: string
+}) {
+  return (
+    <Box
+      sx={{
+        border: '1px solid #e0e0e0',
+        mb: 2,
+        p: 2,
+      }}
+    >
+      <div className="flex items-start gap-1">
+        <Avatar
+          sx={{
+            height: 40,
+            width: 40,
+          }}
+          src={comment.user_avatar || ''}
+        >
+          <UserCircleIcon fontSize="small" />
+        </Avatar>
+        <div className="flex-1">
+          <Link
+            to={`/projects/${projectKey}/members/${comment.user_id}`}
+            className="link font-bold font-xl"
+          >
+            {comment.user_name}
+          </Link>
+          <Typography variant="body2">
+            {getRelativeTime(comment.created_at)}
+          </Typography>
+          <Typography sx={{ mt: 2 }} variant="body2">
+            {comment.content}
+          </Typography>
+        </div>
+      </div>
+    </Box>
+  )
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -32,12 +90,9 @@ function TabPanel(props: TabPanelProps) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
+      className="mt-2"
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && children}
     </div>
   )
 }
@@ -50,12 +105,23 @@ function a11yProps(index: number) {
 
 const IssuePage: React.FC = () => {
   const params = useParams()
+  const { toastError, toastSuccess } = useApp()
+  const { user } = useAuth()
   const isMounted = useRef(false)
   const [loading, setLoading] = useState(true)
   const [loadingTab, setLoadingTab] = useState(true)
+  const [loadingComment, setLoadingComment] = useState(false)
   const [issue, setIssue] = useState<Issue | null>(null)
-  const [tab, setTab] = useState(0)
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState(() => {
+    const tab = searchParams.get('t')
+    if (tab === 'spent') return 1
+    return 0
+  })
   const [spents, setSpents] = useState<SpentTime[]>([])
+  const [comments, setComments] = useState<Comment[]>([])
+  const [content, setContent] = useState('')
+
   const fetchSpents = useCallback(async () => {
     try {
       setLoadingTab(true)
@@ -66,11 +132,54 @@ const IssuePage: React.FC = () => {
     } finally {
       setLoadingTab(false)
     }
-  }, [])
+  }, [params.id])
+  const fetchComments = useCallback(async () => {
+    try {
+      setLoadingTab(true)
+      const response = await getIssueComments(+params.id!)
+      if (isMounted.current) setComments(response)
+    } catch (error) {
+      setSpents([])
+    } finally {
+      setLoadingTab(false)
+    }
+  }, [params.id])
+
+  const handleCreateComment = useCallback(async () => {
+    try {
+      setLoadingComment(true)
+      const response = await createComment({
+        issue_id: params.id,
+        project_key: params.key,
+        content,
+      })
+      if (isMounted.current) {
+        setComments([
+          { ...response, user_name: user!.name, user_avatar: user!.avatar },
+          ...comments,
+        ])
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setContent('')
+      toastSuccess('')
+    } catch (error: any) {
+      const errors = error.data.errors as Record<string, string[]>
+      if (errors) {
+        toastError(errors[Object.keys(errors)[0]][0])
+      } else {
+        console.log(error)
+        toastError('Something went wrong')
+      }
+    } finally {
+      setLoadingComment(false)
+    }
+  }, [params, content])
+
   const handleChangeTab = useCallback(
     (_: any, newValue: number) => {
       tab !== newValue && setTab(newValue)
       if (newValue === 1) return fetchSpents()
+      else return fetchComments()
     },
     [tab]
   )
@@ -93,6 +202,14 @@ const IssuePage: React.FC = () => {
       isMounted.current = false
     }
   }, [params])
+
+  const isDueClass = useMemo(() => {
+    if (!issue || !issue.due_date) return ''
+    const dueDate = new Date(issue.due_date)
+    const now = new Date()
+    if (dueDate < now && issue.percent_complete < 100) return 'text-danger'
+    return ''
+  }, [issue])
   if (loading)
     return (
       <Box
@@ -199,7 +316,7 @@ const IssuePage: React.FC = () => {
         <Grid item xs={6} md={2}>
           {formatDateOnly(issue.start_date)}
           <br />
-          {formatDateOnly(issue.due_date)}
+          <span className={isDueClass}>{formatDateOnly(issue.due_date)}</span>
           <br />
           {IssuePercentComplete(issue.percent_complete)}
           {issue.estimate_time || 0} h
@@ -209,9 +326,7 @@ const IssuePage: React.FC = () => {
       </Grid>
       <hr className="mt-2" />
       <h5 className="mt-2">Description:</h5>
-      <Typography sx={{ pt: 2 }} variant="body1">
-        {issue.description}
-      </Typography>
+      <div dangerouslySetInnerHTML={{ __html: issue.description || '' }}></div>
       <div>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
@@ -224,11 +339,46 @@ const IssuePage: React.FC = () => {
           </Tabs>
         </Box>
         <TabPanel value={tab} index={0}>
-          Comments
+          {loadingTab ? (
+            <CircularProgress />
+          ) : (
+            <div>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                  <TextField
+                    label="Comment"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    fullWidth
+                    multiline
+                    rows={4}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <LoadingButton
+                    loading={loadingComment}
+                    variant="outlined"
+                    onClick={handleCreateComment}
+                  >
+                    Add Comment
+                  </LoadingButton>
+                </Grid>
+              </Grid>
+              <div className="mt-2">
+                {comments.map((comment) => (
+                  <CommentComponent
+                    comment={comment}
+                    key={comment.id}
+                    projectKey={params.key}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </TabPanel>
         <TabPanel value={tab} index={1}>
           {spents.map((spent) => (
-            <div className="spent">
+            <div className="spent" key={spent.id}>
               <h4>
                 Added by{' '}
                 <Link

@@ -13,6 +13,7 @@ export interface Activity {
   type: string
   created_at: string
   user_name: string | null
+  issue_subject: string
   data: {
     label: number
     link: string

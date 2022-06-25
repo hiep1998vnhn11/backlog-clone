@@ -37,9 +37,10 @@ class IssueController extends Controller
         if (!in_array($sortBy, [
             'updated_at', 'created_at', 'priority',
             'estimate_time', 'percent_complete', 'assignee_name',
-            'category_name', 'tracker', 'subject'
+            'category_name', 'tracker', 'subject', 'id'
         ])) $sortBy = 'updated_at';
         if (!in_array($sortType, ['asc', 'desc'])) $sortType = 'desc';
+
         $query = $project->issues()
             ->select(
                 'issues.*',
@@ -85,14 +86,18 @@ class IssueController extends Controller
                             ->whereDate('issues.start_date', '<=', $endMonth);
                     } else if ($dateType === 'today') {
                         $q->whereDate('issues.start_date', $now->format('Y-m-d'));
+                    } else if ($dateType === 'last_month') {
+                        $now = $now->subMonth();
+                        $monthDay = $now->startOfMonth()->format('Y-m-d');
+                        $endMonth = $now->endOfMonth()->format('Y-m-d');
+                        $q->whereDate('issues.start_date', '>=', $monthDay)
+                            ->whereDate('issues.start_date', '<=', $endMonth);
                     }
                 }
             })
             ->orderBy($sortBy, $sortType)
             ->paginate($limit);
-        return $this->sendRespondSuccess(
-            $query
-        );
+        return $this->sendRespondSuccess($query);
     }
 
     /**
@@ -193,6 +198,18 @@ class IssueController extends Controller
         $spents = $issue->spents()
             ->select('spent_times.*', 'users.name as user_name')
             ->leftJoin('users', 'spent_times.user_id', '=', 'users.id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return $this->sendRespondSuccess($spents);
+    }
+
+    public function comments(Issue $issue)
+    {
+        if (!$issue->project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
+        $spents = $issue->comments()
+            ->select('comments.*', 'users.name as user_name', 'users.avatar as user_avatar')
+            ->leftJoin('users', 'comments.user_id', '=', 'users.id')
+            ->orderBy('created_at', 'desc')
             ->get();
         return $this->sendRespondSuccess($spents);
     }

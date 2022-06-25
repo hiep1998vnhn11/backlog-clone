@@ -68,6 +68,7 @@ const AddIssue = () => {
     setPercentComplete(issue.percent_complete + '')
     setLevel(issue.level)
     setStatus(issue.status)
+    setTracker(issue.tracker)
     if (members.length) {
       const member = members.find((m) => m.value === issue.assignee_id)
       member && setAssignee(member)
@@ -177,6 +178,7 @@ const AddIssue = () => {
       assignee,
       category,
       status,
+      tracker,
     ]
   )
   if (loadingIssue)
@@ -289,7 +291,7 @@ const AddIssue = () => {
                       >
                         <MenuItem value="Low">Low</MenuItem>
                         <MenuItem value="Normal">Normal</MenuItem>
-                        <MenuItem value="Hight">Hight</MenuItem>
+                        <MenuItem value="High">High</MenuItem>
                         <MenuItem value="Urgent">Urgent</MenuItem>
                         <MenuItem value="Immediate">Immediate</MenuItem>
                       </Select>
@@ -370,7 +372,7 @@ const AddIssue = () => {
                   </Grid>
 
                   <Grid item md={6} xs={12}>
-                    <Autocomplete
+                    {/* <Autocomplete
                       disablePortal
                       id="category"
                       size="small"
@@ -381,7 +383,7 @@ const AddIssue = () => {
                       renderInput={(params) => (
                         <TextField {...params} label="Category" />
                       )}
-                    />
+                    /> */}
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <TextField

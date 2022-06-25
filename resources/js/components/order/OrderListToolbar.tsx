@@ -196,6 +196,7 @@ const OrderListToolbar: React.FC<Props> = (props) => {
                         <MenuItem value="today">Today</MenuItem>
                         <MenuItem value="week">This week</MenuItem>
                         <MenuItem value="month">This month</MenuItem>
+                        <MenuItem value="last_month">Last month</MenuItem>
                         <MenuItem value="day">Select day</MenuItem>
                       </Select>
                     </FormControl>

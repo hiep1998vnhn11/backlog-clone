@@ -1,10 +1,10 @@
 import { Box, Container } from '@mui/material'
 import SpentList from '/@/components/spent/SpentList'
 import SpentToolbar from '/@/components/spent/SpentToolbar'
-import { getIssues, Issue } from '/@/api/issue'
 import { getListSpents, SpentTime } from '/@/api/spent'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '/@/hooks/common'
+import { formatDateToDateDB } from '/@/utils/format'
 
 const OrderPage = () => {
   const params = useParams()
@@ -18,7 +18,10 @@ const OrderPage = () => {
   const [status, setStatus] = useState('All')
   const [spents, setSpents] = useState<SpentTime[]>([])
   const [loading, setLoading] = useState(false)
+  const [date, setDate] = useState<Date | null>(null)
+  const [dateType, setDateType] = useState('')
   const [total, setTotal] = useState(0)
+  const [totalHours, setTotalHours] = useState(0)
   const isMounted = useRef(false)
   const fetchOrder = useCallback(async () => {
     try {
@@ -33,10 +36,13 @@ const OrderPage = () => {
         activity: status,
         level,
         search_key: searchKey,
+        date_type: dateType,
+        date: formatDateToDateDB(date),
       })
       if (isMounted.current) {
         setSpents(response.data)
         setTotal(response.total)
+        setTotalHours(response.total_hours)
       }
     } catch (err) {
       console.warn(err)
@@ -56,6 +62,8 @@ const OrderPage = () => {
     assignee,
     status,
     level,
+    dateType,
+    date,
   ])
 
   const handleSort = useCallback(
@@ -70,7 +78,7 @@ const OrderPage = () => {
     [sortField, sortDirection]
   )
 
-  useDebounce(() => fetchOrder(), 350, [searchKey])
+  useDebounce(() => fetchOrder(), 350, [searchKey, dateType, date])
   useEffect(() => {
     isMounted.current = true
     fetchOrder()
@@ -106,6 +114,11 @@ const OrderPage = () => {
           setStatus={setStatus}
           level={level}
           setLevel={setLevel}
+          date={date}
+          setDate={setDate}
+          dateType={dateType}
+          setDateType={setDateType}
+          totalHours={totalHours}
         />
         <Box sx={{ mt: 3 }}>
           <SpentList

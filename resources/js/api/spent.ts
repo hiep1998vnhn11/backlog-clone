@@ -40,6 +40,7 @@ export function getListSpents(params: any) {
   return defHttp.get<{
     data: SpentTime[]
     total: number
+    total_hours: number
   }>({
     url: indexApi,
     params,

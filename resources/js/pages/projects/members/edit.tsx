@@ -289,7 +289,7 @@ const AddIssue = () => {
                       >
                         <MenuItem value="Low">Low</MenuItem>
                         <MenuItem value="Normal">Normal</MenuItem>
-                        <MenuItem value="Hight">Hight</MenuItem>
+                        <MenuItem value="High">High</MenuItem>
                         <MenuItem value="Urgent">Urgent</MenuItem>
                         <MenuItem value="Immediate">Immediate</MenuItem>
                       </Select>

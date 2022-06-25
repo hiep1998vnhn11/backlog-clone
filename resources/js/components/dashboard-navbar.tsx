@@ -24,6 +24,7 @@ import { Cog as CogIcon } from '../icons/cog'
 import { Search as SearchIcon } from '../icons/search'
 import { projectPluck } from '/@/api/project'
 import { RoleEnum } from '../enums/roleEnum'
+import { getNotifications, Notification } from '/@/api/notification'
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }: { theme: Theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -39,6 +40,7 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [searchProject, setSearchProject] = useState('')
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [projects, setProjects] = useState<
     {
       name: string
@@ -59,6 +61,9 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
   //project dropdown
   const projectDropdownRef = useRef<HTMLDivElement | null>(null)
   const [projectDropdown, setProjectDropdown] = useState(false)
+  //notification dropdown
+  const notificationDropdownRef = useRef<HTMLDivElement | null>(null)
+  const [notificationDropdown, setNotificationDropdown] = useState(false)
 
   const { toggleSidebar, isSidebarOpen, hideSidebar, ...other } = props
 
@@ -74,6 +79,22 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
       setLoading(false)
     }
   }, [searchProject])
+  const handleFetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await getNotifications({})
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setNotifications(response)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    handleFetchNotifications()
+  }, [])
   useDebounce(handleSearchProject, 350, [searchProject])
   const toggleProjectDropdown = useCallback(
     () =>
@@ -81,6 +102,10 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
         if (!value) handleSearchProject()
         return !value
       }),
+    []
+  )
+  const toggleNotificationDropdown = useCallback(
+    () => setNotificationDropdown((value) => !value),
     []
   )
   useEventListener('click', (event) => {
@@ -100,7 +125,28 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
         return
       setProjectDropdown(false)
     })()
+    ;(() => {
+      if (!notificationDropdown || !notificationDropdownRef.current) return
+      if (
+        notificationDropdownRef.current.contains(target) ||
+        notificationDropdownRef.current == target
+      )
+        return
+      setNotificationDropdown(false)
+    })()
   })
+
+  const handleClickNotification = useCallback((notification: Notification) => {
+    if (notification.type === 'comment_task')
+      return navigate(
+        `/projects/${notification.data.project_key}/issues/${notification.data.issue_id}`
+      )
+  }, [])
+  const getNotificationMessage = useCallback((notification: Notification) => {
+    if (notification.type === 'comment_task')
+      return notification.data.content.slice(0, 100)
+    return notification.data
+  }, [])
 
   return (
     <DashboardNavbarRoot
@@ -182,13 +228,42 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
         )}
         <Box sx={{ flexGrow: 1 }} />
 
-        <Tooltip title="Notifications">
-          <IconButton sx={{ ml: 1 }}>
-            <Badge badgeContent={4} color="primary" variant="dot">
-              <BellIcon fontSize="small" />
-            </Badge>
-          </IconButton>
-        </Tooltip>
+        <div ref={notificationDropdownRef} className="dropdown">
+          <Tooltip title="Notifications">
+            <IconButton sx={{ ml: 1 }} onClick={toggleNotificationDropdown}>
+              {notifications.length ? (
+                <Badge badgeContent={4} color="primary" variant="dot">
+                  <BellIcon fontSize="small" />
+                </Badge>
+              ) : (
+                <BellIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+          {notificationDropdown && (
+            <div className="dropdown-menu notification-list">
+              <div className="p-2">Your notification</div>
+              <ul>
+                {loading ? (
+                  <li className="flex justify-center p-2">
+                    <CircularProgress />
+                  </li>
+                ) : (
+                  notifications.map((notification) => (
+                    <li
+                      key={notification.id}
+                      className="notification-list-item"
+                      onClick={() => handleClickNotification(notification)}
+                    >
+                      <div className="title">{notification.title}</div>
+                      <p>{getNotificationMessage(notification)}</p>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
 
         <div ref={dropdownRef} className="dropdown">
           <div

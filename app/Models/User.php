@@ -6,7 +6,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -15,7 +14,7 @@ class User extends Authenticatable implements JWTSubject
     const ROLE_ADMIN = 'admin';
     const ROLE_MANAGER = 'manager';
 
-    use HasFactory, Notifiable;
+    use HasFactory;
     /**
      * The attributes that are mass assignable.
      *
@@ -85,5 +84,14 @@ class User extends Authenticatable implements JWTSubject
     public function hasAnyRole(array $roles)
     {
         return in_array($this->role, $roles);
+    }
+
+    public function notifi(array $noti)
+    {
+        Notification::create(
+            array_merge([
+                'user_id' => $this->id,
+            ], $noti)
+        );
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\Project\UpdateMemberRequest;
 use App\Models\Activity;
 use App\Models\Issue;
 use App\Models\Member;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
@@ -70,7 +71,7 @@ class MemberController extends Controller
     {
         $project = Project::where('key', $request->project_key)->firstOrFail();
         if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::findOrFail($request->user_id);
         $member = Member::query()
             ->where('project_id', $project->id)
             ->where('user_id', $user->id)
@@ -86,6 +87,15 @@ class MemberController extends Controller
             'project_id' => $project->id,
             'user_id' => $user->id,
             'joined_at' => Carbon::now(),
+        ]);
+
+        $user->notifi([
+            'type' => Notification::TYPE_NEW_MEMBER,
+            'title' => 'You have been invited to join ' . $project->name,
+            'data' => [
+                'project_key' => $project->key,
+                'link' => '/projects/' . $project->key,
+            ]
         ]);
 
         Activity::create([
@@ -180,7 +190,18 @@ class MemberController extends Controller
         if (!$member->project_id == $project->id) return $this->sendForbidden();
         if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
         $user = User::findOrFail($member->user_id);
+        if ($member->role == Member::ROLE_MEMBER && $request->role == Member::ROLE_MANAGER)
+            $user->notifi([
+                'type' => Notification::TYPE_CHANGE_ROLE,
+                'title' => 'You have been grant manager permission to project ' . $project->name,
+                'data' => [
+                    'project_key' => $project->key,
+                    'link' => '/projects/' . $project->key,
+                ]
+            ]);
         $member->role = $request->role;
+
+
         $member->save();
         return $this->sendRespondSuccess();
     }

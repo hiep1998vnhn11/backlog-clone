@@ -35,6 +35,13 @@ interface CustomerRowProps {
 }
 
 const CustomerRow = ({ order, projectKey }: CustomerRowProps) => {
+  const isDueClass = useMemo(() => {
+    if (!order.due_date) return ''
+    const dueDate = new Date(order.due_date)
+    const now = new Date()
+    if (dueDate < now && order.percent_complete < 100) return 'text-danger'
+    return ''
+  }, [order])
   return (
     <TableRow hover key={order.id} sx={{ '& > *': { borderBottom: 'unset' } }}>
       <TableCell>
@@ -67,7 +74,9 @@ const CustomerRow = ({ order, projectKey }: CustomerRowProps) => {
       <TableCell padding="none">{formatDate(order.updated_at)}</TableCell>
       <TableCell padding="none">{order.category_name}</TableCell>
       <TableCell padding="none">{formatDateOnly(order.start_date)}</TableCell>
-      <TableCell padding="none">{formatDateOnly(order.due_date)}</TableCell>
+      <TableCell padding="none">
+        <span className={isDueClass}>{formatDateOnly(order.due_date)}</span>
+      </TableCell>
       <TableCell padding="none">{order.estimate_time || 0}</TableCell>
       <TableCell padding="none">{order.spent_time || 0}</TableCell>
       <TableCell padding="none">
@@ -117,7 +126,15 @@ const IssueList: React.FC<Props> = ({
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>#</TableCell>
+                <TableCell sortDirection={sortField === 'id' && sortDirection}>
+                  <TableSortLabel
+                    active={sortField === 'id'}
+                    direction={sortDirection}
+                    onClick={() => onSort('id')}
+                  >
+                    #
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell
                   padding="none"
                   sortDirection={sortField === 'tracker' && sortDirection}

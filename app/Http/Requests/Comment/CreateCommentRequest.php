@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Project;
+namespace App\Http\Requests\Comment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class InviteMemberRequest extends FormRequest
+class CreateCommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +24,9 @@ class InviteMemberRequest extends FormRequest
     public function rules()
     {
         return [
-            'user_id' => 'required|numeric|exists:users,id',
+            'issue_id' => 'required|numeric',
             'project_key' => 'required|string',
+            'content' => 'required|string',
         ];
     }
 }

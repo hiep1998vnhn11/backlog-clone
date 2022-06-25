@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Comment\CreateCommentRequest;
+use App\Models\Activity;
+use App\Models\Comment;
+use App\Models\Notification;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -32,9 +37,40 @@ class CommentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateCommentRequest $request)
     {
-        //
+        $project = Project::where('key', $request->project_key)->firstOrFail();
+        if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
+        $issue = $project->issues()->where('id', $request->issue_id)->firstOrFail();
+
+        Activity::create([
+            'user_id' => $request->user_id,
+            'project_id' => $project->id,
+            'object_id' => $request->issue_id,
+            'type' => Activity::TYPE_COMMENT,
+            'data' => [
+                'label' => '(' . $issue->tracker . ' #' . $issue->id . " ($issue->status)): $request->content",
+                'link' => 'issues/' . $request->issue_id,
+            ]
+        ]);
+        if ($issue->user) {
+            $issue->user->notifi([
+                'type' => Notification::TYPE_COMMENT_TASK,
+                'title' => auth()->user()->name . ' commented on your task.',
+                'data' => [
+                    'issue_id' => $issue->id,
+                    'project_key' => $project->key,
+                    'content' => $request->content,
+                ]
+            ]);
+        }
+        $comment = Comment::create([
+            'user_id' => auth()->id(),
+            'issue_id' => $issue->id,
+            'content' => $request->content,
+        ]);
+
+        return $this->sendRespondSuccess($comment);
     }
 
     /**

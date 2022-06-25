@@ -13,6 +13,7 @@ class Activity extends Model
     const TYPE_ISSUE = 'Issue';
     const TYPE_MEMBER = 'Member';
     const TYPE_SPENT_TIME = 'Spent time';
+    const TYPE_COMMENT = 'Comment';
 
     protected $fillable = [
         'project_id',

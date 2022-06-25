@@ -1,3 +1,4 @@
+import { User } from './models/authModel'
 import { defHttp } from '/@/utils/http'
 import { Project } from './models/projectModel'
 const indexApi = '/project'
@@ -64,6 +65,14 @@ export const projectPluck = (search_key: string) =>
     }[]
   >({
     url: '/project/pluck',
+    params: {
+      search_key,
+    },
+  })
+
+export const searchMemberForInvite = (projectKey: string, search_key: string) =>
+  defHttp.get<User[]>({
+    url: '/project/' + projectKey + '/searchMemberForInvite',
     params: {
       search_key,
     },

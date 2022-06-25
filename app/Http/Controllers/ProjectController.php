@@ -169,4 +169,27 @@ class ProjectController extends Controller
         $project->issueCategories()->create($request->validated());
         return $this->sendRespondSuccess($request->key);
     }
+
+    public function searchMemberForInvite(string $projectKey, Request $request)
+    {
+        $project = Project::where('key', $projectKey)->firstOrFail();
+        if (!$project->hasPermissionCreateIssue(auth()->user())) return $this->sendForbidden();
+        $searchKey = $request->search_key ?? '';
+        $members = $project->members()
+            ->select('user_id')
+            ->get()
+            ->map(function ($member) {
+                return $member->id;
+            });
+        $users = User::where('role', 'member')
+            ->when($searchKey, function ($q, $searchKey) {
+                $q->where('name', 'like', '%' . $searchKey . '%')
+                    ->orWhere('email', 'like', '%' . $searchKey . '%');
+            })
+            ->whereNotIn('id', $members)
+            ->limit('12')
+            ->get();
+
+        return $this->sendRespondSuccess($users);
+    }
 }

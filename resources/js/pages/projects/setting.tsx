@@ -18,6 +18,7 @@ import {
   SelectChangeEvent,
   MenuItem,
   FormHelperText,
+  Autocomplete,
 } from '@mui/material'
 import Dialog from '/@/components/Dialog'
 import {
@@ -47,6 +48,9 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import SupportAgentIcon from '@mui/icons-material/SupportAgent'
 import { RoleEnum } from '/@/enums/roleEnum'
 import { Project } from '/@/api/models/projectModel'
+import { User } from '/@/api/models/authModel'
+import SelectUser from './SelectUser'
+
 const roleColors: any = {
   admin: 'primary',
   manager: 'secondary',
@@ -116,6 +120,7 @@ const Settings = () => {
   const [role, setRole] = useState<RoleEnum>(RoleEnum.MEMBER)
   const isMounted = useRef(false)
   const [project, setProject] = useState<Project | null>(null)
+  const [userSelected, setUserSelected] = useState<User | null>(null)
   const isMember = useMemo(() => {
     if (!project) return true
     return ![RoleEnum.ADMIN, RoleEnum.MANAGER].includes(project.role)
@@ -214,26 +219,23 @@ const Settings = () => {
     }
   }, [name, description, params.key])
   const handleCreateInviteMember = useCallback(async () => {
+    if (!userSelected) return toastError('Please select a user')
     try {
       setLoading(true)
-      setNameError('')
       await createMember({
-        email: name,
+        user_id: userSelected.id,
         project_key: params.key!,
       })
-      setName('')
       toggleOpen()
       fetchMember()
+      setUserSelected(null)
       toastSuccess('Invite sent successfully')
     } catch (error: any) {
-      const errors = error.data.errors
-      setNameError(
-        errors ? errors.email?.[0] : 'Not found member with this email!'
-      )
+      toastError('Invite failed')
     } finally {
       setLoading(false)
     }
-  }, [name, params.key])
+  }, [userSelected, params.key])
   const handleUpdateMemberMember = useCallback(async () => {
     try {
       setNameError('')
@@ -337,7 +339,12 @@ const Settings = () => {
     if (dialogState.current.type === 'invite') return handleCreateInviteMember()
 
     return handleUpdateMemberMember()
-  }, [handleCreateCategory, handleUpdateCategory, handleUpdateMemberMember])
+  }, [
+    handleCreateCategory,
+    handleUpdateCategory,
+    handleUpdateMemberMember,
+    handleCreateInviteMember,
+  ])
   const onEditCategory = useCallback((category: Category) => {
     dialogState.current.title = 'Category: ' + category.name
     dialogState.current.id = category.id
@@ -536,7 +543,28 @@ const Settings = () => {
           loading={loading}
         >
           <Box sx={{ width: '600px' }}>
-            {dialogState.current.type !== 'edit_member' ? (
+            {dialogState.current.type === 'edit_member' ? (
+              <FormControl fullWidth error={!!nameError}>
+                <InputLabel id="role-select-small">Role</InputLabel>
+                <Select
+                  labelId="role-select-small"
+                  id="role-select-small"
+                  value={role}
+                  label="Role"
+                  onChange={handleRoleChange}
+                  name="role"
+                >
+                  <MenuItem value={RoleEnum.MANAGER}>Manager</MenuItem>
+                  <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
+                </Select>
+                <FormHelperText>{nameError}</FormHelperText>
+              </FormControl>
+            ) : dialogState.current.type === 'invite' ? (
+              <SelectUser
+                userSelected={userSelected}
+                setUserSelected={setUserSelected}
+              />
+            ) : (
               <TextField
                 fullWidth
                 required
@@ -554,22 +582,6 @@ const Settings = () => {
                 error={!!nameError}
                 helperText={nameError}
               />
-            ) : (
-              <FormControl fullWidth error={!!nameError}>
-                <InputLabel id="role-select-small">Role</InputLabel>
-                <Select
-                  labelId="role-select-small"
-                  id="role-select-small"
-                  value={role}
-                  label="Role"
-                  onChange={handleRoleChange}
-                  name="role"
-                >
-                  <MenuItem value={RoleEnum.MANAGER}>Manager</MenuItem>
-                  <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
-                </Select>
-                <FormHelperText>{nameError}</FormHelperText>
-              </FormControl>
             )}
             {dialogState.current.type === 'category' && (
               <>

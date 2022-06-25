@@ -36,6 +36,8 @@ class SpentTimeController extends Controller
             'category_name', 'tracker', 'subject'
         ])) $sortBy = 'updated_at';
         if (!in_array($sortType, ['asc', 'desc'])) $sortType = 'desc';
+        $dateType = $request->date_type ?? '';
+        $date = $request->date ?? '';
 
         $query = $project->spentTimes()
             ->select(
@@ -62,10 +64,46 @@ class SpentTimeController extends Controller
                     $q->where('spent_times.level', '=', $level);
                 }
             })
+            ->when($dateType, function ($q, $dateType) use ($date) {
+                if ($dateType === 'day') {
+                    if ($date) {
+                        $q->whereDate('spent_times.date', $date);
+                    }
+                } else {
+                    $now = now();
+                    if ($dateType === 'week') {
+                        $monDay = $now->startOfWeek()->format('Y-m-d');
+                        $sunday = $now->endOfWeek()->format('Y-m-d');
+                        $q->whereDate('spent_times.date', '>=', $monDay)
+                            ->whereDate('spent_times.date', '<=', $sunday);
+                    } elseif ($dateType === 'month') {
+                        $monthDay = $now->startOfMonth()->format('Y-m-d');
+                        $endMonth = $now->endOfMonth()->format('Y-m-d');
+                        $q->whereDate('spent_times.date', '>=', $monthDay)
+                            ->whereDate('spent_times.date', '<=', $endMonth);
+                    } else if ($dateType === 'today') {
+                        $q->whereDate('spent_times.date', $now->format('Y-m-d'));
+                    } else if ($dateType === 'last_month') {
+                        $now = $now->subMonth();
+                        $monthDay = $now->startOfMonth()->format('Y-m-d');
+                        $endMonth = $now->endOfMonth()->format('Y-m-d');
+                        $q->whereDate('spent_times.date', '>=', $monthDay)
+                            ->whereDate('spent_times.date', '<=', $endMonth);
+                    }
+                }
+            });
+
+        $data = $query
             ->orderBy($sortBy, $sortType)
             ->paginate($limit);
+
+        $totalSpentTime = $query->sum('spent_times.hours');
         return $this->sendRespondSuccess(
-            $query
+            [
+                'data' => $data->items(),
+                'total' => $data->total(),
+                'total_hours' => $totalSpentTime,
+            ]
         );
     }
 
@@ -105,13 +143,13 @@ class SpentTimeController extends Controller
         );
 
         Activity::create([
-            'user_id' => auth()->id(),
+            'user_id' => $request->user_id,
             'project_id' => $project->id,
-            'object_id' => $request->user_id,
+            'object_id' => $request->issue_id,
             'type' => Activity::TYPE_SPENT_TIME,
             'data' => [
-                'label' => auth()->user()->name . ' added spent time: ' . $spent->hours . ' hours',
-                'link' => 'spents/' . $spent->id,
+                'label' => $request->hours . ' hours (' . $issue->tracker . ' #' . $issue->id . " ($issue->status): $issue->subject)",
+                'link' => 'issues/' . $request->issue_id . '?t=spent',
             ]
         ]);
 

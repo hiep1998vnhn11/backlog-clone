@@ -127,6 +127,9 @@ $primary-color: #5048e5;
   &.gap-2 {
     gap: 1rem;
   }
+  &.gap-1 {
+    gap: 0.5rem;
+  }
   &-1 {
     flex: 1;
   }
@@ -186,9 +189,27 @@ $primary-color: #5048e5;
     background-color: rgba(247, 246, 158, 0.1);
   }
 }
-
+.text-danger {
+  color: #e5123d;
+}
 .chip-Bug {
+  color: #fff;
+  padding: 0 6px;
   background-color: #e5123d;
+  font-weight: 600;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.chip-Feature {
+  background-color: #0065ff;
+  color: #fff;
+  padding: 0 6px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.chip-Support {
+  background-color: #029934;
   color: #fff;
   padding: 0 6px;
   font-weight: 600;
@@ -284,6 +305,34 @@ $primary-color: #5048e5;
       margin-left: 2px;
       border-width: 6px;
       border-right-color: #f9fafb;
+    }
+  }
+}
+
+.font-bold {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.notification-list {
+  color: #222;
+  padding: 0;
+  overflow: auto;
+  max-height: 400px;
+  &-item {
+    border-bottom: solid 1px $primary-color;
+    word-wrap: break-word;
+    padding: 12px 8px;
+    .title {
+      font-weight: bold;
+      color: #222;
+    }
+    &:hover {
+      background-color: #f7f69e;
+      cursor: pointer;
+    }
+    &:last-child {
+      border-bottom: none;
     }
   }
 }

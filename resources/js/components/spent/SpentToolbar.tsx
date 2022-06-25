@@ -23,6 +23,7 @@ import {
   useMemberAndCategory,
   OptionItem,
 } from '/@/pages/projects/useMemberAndCategory'
+import { DatePicker } from '@mui/lab'
 
 interface Props {
   handleChangeSearchKey: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -33,6 +34,11 @@ interface Props {
   status: string
   level: string
   setLevel: (value: string) => void
+  dateType: string
+  setDateType: (value: string) => void
+  date: null | Date
+  setDate: (value: Date | null) => void
+  totalHours: number
 }
 
 const issueStatus = ['All', 'Development', 'Check']
@@ -50,12 +56,24 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     searchKey,
     status,
     setStatus,
+    dateType,
+    setDateType,
+    date,
+    setDate,
+    totalHours,
   } = props
 
   const handleSelectedAssigneeChange = useCallback(
     (_: any, value: OptionItem | null) => {
       handleAssigneeChange(value ? value.value + '' : '')
       setAssigneeSelected(value)
+    },
+    []
+  )
+
+  const handleDateTypeChange = useCallback(
+    (event: SelectChangeEvent<string>) => {
+      setDateType(event.target.value)
     },
     []
   )
@@ -78,7 +96,7 @@ const OrderListToolbar: React.FC<Props> = (props) => {
         <Typography sx={{ m: 1 }} variant="h4">
           Spent time
         </Typography>
-        <Box sx={{ m: 1 }}>
+        {/* <Box sx={{ m: 1 }}>
           <Button
             LinkComponent={Link}
             color="primary"
@@ -87,11 +105,12 @@ const OrderListToolbar: React.FC<Props> = (props) => {
           >
             New spent time
           </Button>
-        </Box>
+        </Box> */}
       </Box>
       <Box sx={{ mt: 3 }}>
         <Card>
           <CardContent>
+            <h3 className="mb-2">Total spents: {totalHours} Hours</h3>
             <div className="flex items-center mb-2 gap-2">
               Status:
               {issueStatus.map((item) => (
@@ -156,6 +175,42 @@ const OrderListToolbar: React.FC<Props> = (props) => {
                     <MenuItem value="Extremely hard">Extremely hard</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+
+              <Grid item md={5} xs={12}>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="date-type">Date</InputLabel>
+                      <Select
+                        labelId="date-type"
+                        id="date-type"
+                        value={dateType}
+                        label="Date"
+                        onChange={handleDateTypeChange}
+                      >
+                        <MenuItem value="">None</MenuItem>
+                        <MenuItem value="today">Today</MenuItem>
+                        <MenuItem value="week">This week</MenuItem>
+                        <MenuItem value="month">This month</MenuItem>
+                        <MenuItem value="last_month">Last month</MenuItem>
+                        <MenuItem value="day">Select day</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div className="flex-1">
+                    {dateType === 'day' && (
+                      <DatePicker
+                        label="Select date"
+                        value={date}
+                        onChange={setDate}
+                        renderInput={(params: any) => (
+                          <TextField {...params} fullWidth size="small" />
+                        )}
+                      />
+                    )}
+                  </div>
+                </div>
               </Grid>
             </Grid>
           </CardContent>

@@ -6,6 +6,17 @@ import {
 } from './models/categoryModel'
 import { SpentTime } from './spent'
 const indexApi = '/issue'
+
+export interface Comment {
+  id: number
+  content: string
+  issue_id: number
+  user_id: number
+  created_at: string
+  updated_at: string
+  user_name: string
+  user_avatar: string | null
+}
 export interface Issue {
   assignee_id: null | number
   category_id: null | number
@@ -114,3 +125,13 @@ export const getPluckCategory = () =>
 
 export const getIssueSpents = (id: number) =>
   defHttp.get<SpentTime[]>({ url: indexApi + '/' + id + '/spents' })
+
+export const getIssueComments = (id: number) =>
+  defHttp.get<Comment[]>({ url: indexApi + '/' + id + '/comments' })
+
+export const createComment = (data: any) => {
+  return defHttp.post<Comment>({
+    url: '/comment',
+    data,
+  })
+}

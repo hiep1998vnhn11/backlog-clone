@@ -20,7 +20,7 @@ export interface Member {
 }
 interface CreateMemberData {
   project_key: string
-  email: string
+  user_id: number
 }
 export interface RelatedProject {
   created_at: string
