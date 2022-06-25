@@ -10,7 +10,25 @@ const ShowAccount = () => {
   const params = useParams()
   useEffect(() => {
     window.gantt.init('gantt_here')
+    window.gantt.serverList('priority', [
+      { key: 1, label: 'High' },
+      { key: 2, label: 'Normal' },
+      { key: 3, label: 'Low' },
+    ])
     window.gantt.config.scale_height = 80
+    window.gantt.config.columns = [
+      {
+        name: 'text',
+        label: 'Task name',
+        tree: true,
+        width: '*',
+      },
+      {
+        name: 'priority',
+        label: 'priority',
+        width: '80',
+      },
+    ]
     window.gantt.config.scales = [
       { unit: 'month', step: 1, format: '%F, %Y' },
       { unit: 'week', step: 1, format: '%w' },
@@ -23,6 +41,7 @@ const ShowAccount = () => {
           id: 1,
           text: 'Project #2',
           start_date: '25-06-2022',
+          priority: 'high',
           duration: 60,
           progress: 0.4,
           open: true,

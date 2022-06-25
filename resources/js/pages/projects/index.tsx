@@ -68,7 +68,10 @@ const ProjectPage = () => {
           <Grid item lg={6} md={12} xl={6} xs={12}>
             <Box>
               {Boolean(project.description) && (
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 2, whiteSpace: 'pre-wrap' }}
+                >
                   {project.description}
                 </Typography>
               )}

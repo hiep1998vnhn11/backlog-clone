@@ -28,9 +28,9 @@ const AddIssue: React.FC<Props> = ({ project, isMember }) => {
   const changeKeyRef = useRef(false)
   const formik = useFormik({
     initialValues: {
-      name: '',
-      key: '',
-      description: '',
+      name: project.name,
+      key: project.key,
+      description: project.description || '',
     },
     validationSchema: Yup.object({
       name: Yup.string().max(255).required('Project name is required!'),
