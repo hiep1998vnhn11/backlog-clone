@@ -9,6 +9,8 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ config('app.name') }}</title>
+    <link rel="stylesheet" href="/gantt/dhtmlxgantt.css?v=7.1.12" />
+    <script src="/gantt/dhtmlxgantt.js"></script>
     @env('production')
     {{-- Production --}}
     @if (isset($manifest['resources/js/main.tsx']['css']))
@@ -32,6 +34,7 @@
     @endenv
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700" />
+
 </head>
 
 <body>

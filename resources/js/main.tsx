@@ -7,6 +7,9 @@ const root = createRoot(container)
 import './assets/scss/index.scss'
 declare global {
   type Nullable<T> = null | T
+  interface Window {
+    gantt: any
+  }
 }
 
 root.render(

@@ -17,7 +17,6 @@ import {
   Skeleton,
   CircularProgress,
 } from '@mui/material'
-import { CKEditor } from 'ckeditor4-react'
 import useApp from '/@/context/useApp'
 import { DatePicker, LoadingButton } from '@mui/lab'
 import { useMemberAndCategory, OptionItem } from '../useMemberAndCategory'
@@ -271,11 +270,6 @@ const AddIssue = () => {
                   </Grid>
                   <Grid item md={12} xs={12}>
                     Description:
-                    <CKEditor
-                      initData={description}
-                      onChange={onDescriptionChange}
-                      config={{ language: 'en' }}
-                    />
                   </Grid>
 
                   <Grid item md={6} xs={12}>
