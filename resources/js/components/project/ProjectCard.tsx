@@ -26,7 +26,16 @@ const ProjectCard: React.FC<Props> = ({ project, ...rest }) => (
         <Typography color="textPrimary" variant="body1">
           {project.key}
         </Typography>
-        <Typography color="textPrimary" variant="body2">
+        <Typography
+          color="textPrimary"
+          variant="body2"
+          sx={{
+            whiteSpace: 'pre-wrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxHeight: '175px',
+          }}
+        >
           {project.description}
         </Typography>
       </CardContent>
