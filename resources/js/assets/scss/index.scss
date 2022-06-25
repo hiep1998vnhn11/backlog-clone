@@ -336,3 +336,22 @@ $primary-color: #5048e5;
     }
   }
 }
+
+.markdown-body {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  word-break: break-word;
+  color: #222;
+  &.markdown-body {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    word-break: break-word;
+    color: #222;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}

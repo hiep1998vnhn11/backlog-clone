@@ -17,7 +17,6 @@ import {
   Skeleton,
   CircularProgress,
 } from '@mui/material'
-import { CKEditor } from 'ckeditor4-react'
 import useApp from '/@/context/useApp'
 import { DatePicker, LoadingButton } from '@mui/lab'
 import { useMemberAndCategory, OptionItem } from '../useMemberAndCategory'
@@ -25,6 +24,8 @@ import useAuth from '/@/context/useAuth'
 import { updateIssue } from '/@/api/issue'
 import React from 'react'
 import Page404 from '/@/pages/404'
+import Editor from '/@/components/Editor'
+import { EditorState, convertFromRaw } from 'draft-js'
 
 const AddIssue = () => {
   const { toastError, toastSuccess } = useApp()
@@ -36,10 +37,7 @@ const AddIssue = () => {
     params.key!,
     params.id
   )
-  const [description, setDescription] = useState('')
-  const onDescriptionChange = useCallback((event: any) => {
-    setDescription(event.editor.getData())
-  }, [])
+  const [description, setDescription] = useState(EditorState.createEmpty())
   const [errorSubject, setErrorSubject] = useState(false)
   const [tracker, setTracker] = useState('Bug')
   const [status, setStatus] = useState('Open')
@@ -60,7 +58,12 @@ const AddIssue = () => {
   useEffect(() => {
     if (!issue) return
     setSubject(issue.subject)
-    setDescription(issue.description || '')
+    if (issue.description)
+      setDescription(
+        EditorState.createWithContent(
+          convertFromRaw(JSON.parse(issue.description))
+        )
+      )
     setStartDate(issue.start_date ? new Date(issue.start_date) : null)
     setDueDate(issue.due_date ? new Date(issue.due_date) : null)
     setEstimateTime(issue.estimate_time + '')
@@ -273,10 +276,9 @@ const AddIssue = () => {
                   </Grid>
                   <Grid item md={12} xs={12}>
                     Description:
-                    <CKEditor
-                      initData={description}
-                      onChange={onDescriptionChange}
-                      config={{ language: 'en' }}
+                    <Editor
+                      editorState={description}
+                      setEditorState={setDescription}
                     />
                   </Grid>
 

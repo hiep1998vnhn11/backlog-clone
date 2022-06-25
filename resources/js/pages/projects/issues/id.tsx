@@ -29,6 +29,9 @@ import useApp from '/@/context/useApp'
 import { LoadingButton } from '@mui/lab'
 import useAuth from '/@/context/useAuth'
 import { UserCircle as UserCircleIcon } from '/@/icons/user-circle'
+import { convertToHTML } from 'draft-convert'
+import { convertFromRaw } from 'draft-js'
+import { stateToHTML } from 'draft-js-export-html'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -186,8 +189,15 @@ const IssuePage: React.FC = () => {
   const fetchIssue = useCallback(async () => {
     try {
       const response = await getIssue(params.id!, params.key!)
-      if (isMounted.current) setIssue(response)
+      if (isMounted.current)
+        setIssue({
+          ...response,
+          description: response.description
+            ? stateToHTML(convertFromRaw(JSON.parse(response.description)))
+            : '',
+        })
     } catch (error: any) {
+      console.log(error)
     } finally {
       setTimeout(() => (isMounted.current ? setLoading(false) : null), 250)
     }
@@ -326,7 +336,10 @@ const IssuePage: React.FC = () => {
       </Grid>
       <hr className="mt-2" />
       <h5 className="mt-2">Description:</h5>
-      <div dangerouslySetInnerHTML={{ __html: issue.description || '' }}></div>
+      <div
+        className="markdown-body"
+        dangerouslySetInnerHTML={{ __html: issue.description || '' }}
+      ></div>
       <div>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
@@ -369,7 +382,7 @@ const IssuePage: React.FC = () => {
                   <CommentComponent
                     comment={comment}
                     key={comment.id}
-                    projectKey={params.key}
+                    projectKey={params.key!}
                   />
                 ))}
               </div>

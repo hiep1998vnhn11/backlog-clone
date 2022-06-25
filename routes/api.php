@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SpentTimeController;
+use App\Http\Controllers\UploadController;
 use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,7 @@ Route::group(
         'middelware' => 'auth',
     ],
     function () {
+        Route::post('/upload', [UploadController::class, 'index']);
         Route::post('/upload-avatar', [AuthController::class, 'uploadAvatar']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::post('/change-info', [AuthController::class, 'changeInfo']);

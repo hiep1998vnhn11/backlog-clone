@@ -15,8 +15,9 @@ import {
   SelectChangeEvent,
   InputAdornment,
 } from '@mui/material'
-import { CKEditor } from 'ckeditor4-react'
 import useApp from '/@/context/useApp'
+import Editor from '/@/components/Editor'
+import { EditorState, convertToRaw } from 'draft-js'
 import { DatePicker, LoadingButton } from '@mui/lab'
 import { useMemberAndCategory, OptionItem } from './useMemberAndCategory'
 import useAuth from '/@/context/useAuth'
@@ -30,7 +31,7 @@ const AddIssue = () => {
   const params = useParams()
   const [loading, setLoading] = useState(false)
   const { members, categories } = useMemberAndCategory(params.key!)
-  const [description, setDescription] = useState('')
+  const [description, setDescription] = useState(EditorState.createEmpty())
   const onDescriptionChange = useCallback((event: any) => {
     setDescription(event.editor.getData())
   }, [])
@@ -115,7 +116,9 @@ const AddIssue = () => {
         const id = await createIssue({
           tracker,
           subject,
-          description,
+          description: JSON.stringify(
+            convertToRaw(description.getCurrentContent())
+          ),
           start_date: startDate?.toISOString().split('T')[0],
           due_date: dueDate?.toISOString().split('T')[0],
           priority,
@@ -205,11 +208,15 @@ const AddIssue = () => {
                 </Grid>
                 <Grid item md={12} xs={12}>
                   Description:
-                  <CKEditor
+                  <Editor
+                    editorState={description}
+                    setEditorState={setDescription}
+                  />
+                  {/* <CKEditor
                     initData=""
                     onChange={onDescriptionChange}
                     config={{ language: 'en' }}
-                  />
+                  /> */}
                 </Grid>
 
                 <Grid item md={6} xs={12}>
@@ -301,20 +308,7 @@ const AddIssue = () => {
                   />
                 </Grid>
 
-                <Grid item md={6} xs={12}>
-                  {/* <Autocomplete
-                    disablePortal
-                    id="category"
-                    size="small"
-                    options={categories}
-                    value={category}
-                    onChange={handleCategoryChange}
-                    sx={{ width: 300 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Category" />
-                    )}
-                  /> */}
-                </Grid>
+                <Grid item md={6} xs={12}></Grid>
                 <Grid item md={6} xs={12}>
                   <TextField
                     sx={{ width: '240px' }}
