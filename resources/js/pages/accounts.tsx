@@ -21,9 +21,11 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import useApp from '/@/context/useApp'
 import { RoleEnum } from '/@/enums/roleEnum'
+import useAuth from '../context/useAuth'
 
 const Customers = () => {
   const { toastError, toastSuccess } = useApp()
+  const { user } = useAuth()
   const [loadingForm, setLoadingForm] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -187,6 +189,11 @@ const Customers = () => {
     }
   }, [page, limit, sortDirection, sortField])
 
+  const isAdmin = useMemo(
+    () => (user ? user.role === RoleEnum.ADMIN : false),
+    [user]
+  )
+
   return (
     <Box
       component="main"
@@ -202,6 +209,7 @@ const Customers = () => {
           onSearchKeyChange={setSearchKey}
           onRoleChange={setRole}
           onCreate={toggleOpen}
+          isAdmin={isAdmin}
         />
         <Box sx={{ mt: 3 }}>
           <AccountListResults
@@ -217,127 +225,130 @@ const Customers = () => {
             sortDirection={sortDirection}
             sortField={sortField}
             onSort={handleSort}
+            isAdmin={isAdmin}
           />
         </Box>
       </Container>
-      <Dialog
-        open={open}
-        onClose={toggleOpen}
-        title="Create new account"
-        loading={loadingForm}
-        onConfirm={formik.handleSubmit}
-        confirmText="Save"
-        cancelText="Cancel"
-      >
-        <Box sx={{ width: '800px', maxWidth: '100%' }}>
-          <Grid container spacing={3}>
-            <Grid item md={6} xs={12}>
-              <TextField
-                error={Boolean(formik.touched.name && formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
-                fullWidth
-                label="Name"
-                name="name"
-                required
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.name}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <TextField
-                error={Boolean(formik.touched.email && formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-                fullWidth
-                label="Email"
-                name="email"
-                required
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.email}
-                variant="outlined"
-              />
-            </Grid>
-            {idUpdate.current !== 0 && (
-              <Grid item md={12} xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={showPassword}
-                      onChange={handleChangeShowPassword}
-                    />
-                  }
-                  label="Change account password"
+      {isAdmin && (
+        <Dialog
+          open={open}
+          onClose={toggleOpen}
+          title="Create new account"
+          loading={loadingForm}
+          onConfirm={formik.handleSubmit}
+          confirmText="Save"
+          cancelText="Cancel"
+        >
+          <Box sx={{ width: '800px', maxWidth: '100%' }}>
+            <Grid container spacing={3}>
+              <Grid item md={6} xs={12}>
+                <TextField
+                  error={Boolean(formik.touched.name && formik.errors.name)}
+                  helperText={formik.touched.name && formik.errors.name}
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  required
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  value={formik.values.name}
+                  variant="outlined"
                 />
               </Grid>
-            )}
-            {idUpdate.current === 0 || showPassword ? (
-              <>
-                <Grid item md={6} xs={12}>
-                  <TextField
-                    error={Boolean(
-                      formik.touched.password && formik.errors.password
-                    )}
-                    helperText={
-                      formik.touched.password && formik.errors.password
-                    }
-                    fullWidth
-                    label="Password"
-                    name="password"
-                    required
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.password}
-                    variant="outlined"
-                    type="password"
-                    autoComplete="off"
-                  />
-                </Grid>
-                <Grid item md={6} xs={12}>
-                  <TextField
-                    error={Boolean(
-                      formik.touched.password_confirmation &&
-                        formik.errors.password_confirmation
-                    )}
-                    helperText={
-                      formik.touched.password_confirmation &&
-                      formik.errors.password_confirmation
-                    }
-                    fullWidth
-                    label="Confirm password"
-                    name="password_confirmation"
-                    required
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                    value={formik.values.password_confirmation}
-                    variant="outlined"
-                    type="password"
-                  />
-                </Grid>
-              </>
-            ) : null}
-
-            <Grid item md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="role-select-small">Role</InputLabel>
-                <Select
-                  labelId="role-select-small"
-                  id="role-select-small"
-                  value={formik.values.role}
-                  label="Role"
+              <Grid item md={6} xs={12}>
+                <TextField
+                  error={Boolean(formik.touched.email && formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  required
+                  onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
-                  name="role"
-                >
-                  <MenuItem value={RoleEnum.ADMIN}>Admin</MenuItem>
-                  <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
-                </Select>
-              </FormControl>
+                  value={formik.values.email}
+                  variant="outlined"
+                />
+              </Grid>
+              {idUpdate.current !== 0 && (
+                <Grid item md={12} xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={showPassword}
+                        onChange={handleChangeShowPassword}
+                      />
+                    }
+                    label="Change account password"
+                  />
+                </Grid>
+              )}
+              {idUpdate.current === 0 || showPassword ? (
+                <>
+                  <Grid item md={6} xs={12}>
+                    <TextField
+                      error={Boolean(
+                        formik.touched.password && formik.errors.password
+                      )}
+                      helperText={
+                        formik.touched.password && formik.errors.password
+                      }
+                      fullWidth
+                      label="Password"
+                      name="password"
+                      required
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      value={formik.values.password}
+                      variant="outlined"
+                      type="password"
+                      autoComplete="off"
+                    />
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <TextField
+                      error={Boolean(
+                        formik.touched.password_confirmation &&
+                          formik.errors.password_confirmation
+                      )}
+                      helperText={
+                        formik.touched.password_confirmation &&
+                        formik.errors.password_confirmation
+                      }
+                      fullWidth
+                      label="Confirm password"
+                      name="password_confirmation"
+                      required
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                      value={formik.values.password_confirmation}
+                      variant="outlined"
+                      type="password"
+                    />
+                  </Grid>
+                </>
+              ) : null}
+
+              <Grid item md={6} xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel id="role-select-small">Role</InputLabel>
+                  <Select
+                    labelId="role-select-small"
+                    id="role-select-small"
+                    value={formik.values.role}
+                    label="Role"
+                    onChange={formik.handleChange}
+                    name="role"
+                  >
+                    <MenuItem value={RoleEnum.ADMIN}>Admin</MenuItem>
+                    <MenuItem value={RoleEnum.MEMBER}>Member</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </Dialog>
+          </Box>
+        </Dialog>
+      )}
     </Box>
   )
 }

@@ -53,7 +53,7 @@ Route::group(
         Route::get('/issue/{issue}/spents', [IssueController::class, 'spents']);
         Route::get('/issue/{issue}/comments', [IssueController::class, 'comments']);
 
-        Route::resource('account', AccountController::class)->middleware('role:admin');
+        Route::resource('account', AccountController::class);
         Route::get('/project/{project}/compact', [ProjectController::class, 'compact']);
         Route::resource('/project', ProjectController::class);
         Route::resource('/category', CategoryController::class);

@@ -94,7 +94,7 @@ class ProjectController extends Controller
         $project->spent_time = $sumSpentTime;
 
         $project->joined_members = $project->members()
-            ->select('users.id', 'users.name')
+            ->select('users.id', 'users.name', 'members.role')
             ->join('users', 'users.id', '=', 'members.user_id')
             ->get();
         return $this->sendRespondSuccess($project);

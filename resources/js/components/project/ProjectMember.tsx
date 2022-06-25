@@ -19,23 +19,41 @@ const ProjectMemberPage: React.FC<Props> = ({
   projectKey,
   ...props
 }) => {
+  const renderMember = () => {
+    const result = members.filter((m) => m.role === 'member')
+    return result.map((member, index) => (
+      <>
+        <Link
+          to={`/projects/${projectKey}/members/${member.id}`}
+          className="link"
+        >
+          {member.name}
+        </Link>
+        {index !== result.length - 1 && ','}
+      </>
+    ))
+  }
+  const renderManager = () => {
+    const result = members.filter((m) => m.role === 'manager')
+    return result.map((member, index) => (
+      <>
+        <Link
+          to={`/projects/${projectKey}/members/${member.id}`}
+          className="link"
+        >
+          {member.name}
+        </Link>
+        {index !== result.length - 1 && ','}
+      </>
+    ))
+  }
   return (
     <Card {...props}>
       <CardHeader title="Members" />
       <Divider />
       <CardContent sx={{ px: 4 }}>
-        <ul>
-          {members.map((member) => (
-            <li key={member.id}>
-              <Link
-                to={`/projects/${projectKey}/members/${member.id}`}
-                className="link"
-              >
-                {member.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div>(M) Member: {renderMember()}</div>
+        <div>(PM) Manager: {renderManager()}</div>
       </CardContent>
 
       <Divider />

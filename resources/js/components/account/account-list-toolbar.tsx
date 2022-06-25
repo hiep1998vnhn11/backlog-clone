@@ -24,6 +24,7 @@ interface Props {
   role: string
   onRoleChange: (role: string) => void
   onCreate: () => void
+  isAdmin: boolean
 }
 const AccountListToolbar: React.FC<Props> = ({
   searchKey,
@@ -31,6 +32,7 @@ const AccountListToolbar: React.FC<Props> = ({
   role,
   onRoleChange,
   onCreate,
+  isAdmin,
   ...props
 }) => {
   const handleChangeSearchKey = useCallback(
@@ -57,9 +59,11 @@ const AccountListToolbar: React.FC<Props> = ({
           Accounts manager
         </Typography>
         <Box sx={{ m: 1 }}>
-          <Button color="primary" variant="contained" onClick={onCreate}>
-            Add account
-          </Button>
+          {isAdmin && (
+            <Button color="primary" variant="contained" onClick={onCreate}>
+              Add account
+            </Button>
+          )}
         </Box>
       </Box>
       <Box sx={{ mt: 3 }}>

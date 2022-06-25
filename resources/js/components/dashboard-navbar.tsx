@@ -221,11 +221,9 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
           )}
         </div>
 
-        {user?.role === RoleEnum.ADMIN && (
-          <Button LinkComponent={Link} to="/accounts">
-            Accounts
-          </Button>
-        )}
+        <Button LinkComponent={Link} to="/accounts">
+          Accounts
+        </Button>
         <Box sx={{ flexGrow: 1 }} />
 
         <div ref={notificationDropdownRef} className="dropdown">

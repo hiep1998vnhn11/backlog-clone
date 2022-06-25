@@ -43,6 +43,7 @@ interface Props {
   sortDirection: 'asc' | 'desc'
   sortField: string
   onSort: (field: string) => void
+  isAdmin: boolean
 }
 
 const roleColors: any = {
@@ -62,6 +63,7 @@ const AccountistResults: React.FC<Props> = ({
   sortDirection,
   sortField,
   onSort,
+  isAdmin,
   ...rest
 }) => {
   const { createConfirmModal, toastError, toastSuccess } = useApp()
@@ -237,7 +239,7 @@ const AccountistResults: React.FC<Props> = ({
                 </TableSortLabel>
               </Tooltip>
             </TableCell>
-            <TableCell>Action</TableCell>
+            {isAdmin && <TableCell>Action</TableCell>}
           </>
         )}
       </TableRow>
@@ -316,27 +318,29 @@ const AccountistResults: React.FC<Props> = ({
                       />
                     </TableCell>
                     <TableCell>{formatDateOnly(customer.created_at)}</TableCell>
-                    <TableCell>
-                      <Tooltip title="Edit account">
-                        <IconButton
-                          aria-label="delete"
-                          color="success"
-                          onClick={() => onEdit(customer.id)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
+                    {isAdmin && (
+                      <TableCell>
+                        <Tooltip title="Edit account">
+                          <IconButton
+                            aria-label="delete"
+                            color="success"
+                            onClick={() => onEdit(customer.id)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
 
-                      <Tooltip title="Delete account">
-                        <IconButton
-                          aria-label="delete"
-                          color="error"
-                          onClick={() => handleClickDelete(customer.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                        <Tooltip title="Delete account">
+                          <IconButton
+                            aria-label="delete"
+                            color="error"
+                            onClick={() => handleClickDelete(customer.id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
