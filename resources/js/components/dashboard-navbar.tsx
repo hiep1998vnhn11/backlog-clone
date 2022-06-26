@@ -71,7 +71,6 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
     try {
       setLoading(true)
       const response = await projectPluck(searchProject)
-      await new Promise((resolve) => setTimeout(resolve, 500))
       setProjects(response)
     } catch (error) {
       console.log(error)
@@ -83,7 +82,6 @@ export const DashboardNavbar: React.FC<Props> = (props) => {
     try {
       setLoading(true)
       const response = await getNotifications({})
-      await new Promise((resolve) => setTimeout(resolve, 500))
       setNotifications(response)
     } catch (error) {
       console.log(error)

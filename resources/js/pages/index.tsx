@@ -71,7 +71,6 @@ const IndexPage = () => {
         page,
         searchKey,
       })
-      await new Promise((resolve) => setTimeout(resolve, 500))
       if (isMounted.current) {
         setProjects(data.data)
         setTotalPage(data.last_page)

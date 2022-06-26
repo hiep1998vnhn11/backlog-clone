@@ -29,10 +29,9 @@ import useApp from '/@/context/useApp'
 import { LoadingButton } from '@mui/lab'
 import useAuth from '/@/context/useAuth'
 import { UserCircle as UserCircleIcon } from '/@/icons/user-circle'
-import { convertToHTML } from 'draft-convert'
-import { convertFromRaw } from 'draft-js'
 import { stateToHTML } from 'draft-js-export-html'
-
+import Editor from '/@/components/Editor'
+import { EditorState, convertFromRaw, convertToRaw } from 'draft-js'
 interface TabPanelProps {
   children?: React.ReactNode
   index: number
@@ -74,9 +73,10 @@ function CommentComponent({
           <Typography variant="body2">
             {getRelativeTime(comment.created_at)}
           </Typography>
-          <Typography sx={{ mt: 2 }} variant="body2">
-            {comment.content}
-          </Typography>
+          <div
+            className="markdown-body"
+            dangerouslySetInnerHTML={{ __html: comment.content || '' }}
+          ></div>
         </div>
       </div>
     </Box>
@@ -123,7 +123,7 @@ const IssuePage: React.FC = () => {
   })
   const [spents, setSpents] = useState<SpentTime[]>([])
   const [comments, setComments] = useState<Comment[]>([])
-  const [content, setContent] = useState('')
+  const [content, setContent] = useState(EditorState.createEmpty())
 
   const fetchSpents = useCallback(async () => {
     try {
@@ -140,7 +140,13 @@ const IssuePage: React.FC = () => {
     try {
       setLoadingTab(true)
       const response = await getIssueComments(+params.id!)
-      if (isMounted.current) setComments(response)
+      if (isMounted.current)
+        setComments(
+          response.map((item) => ({
+            ...item,
+            content: stateToHTML(convertFromRaw(JSON.parse(item.content))),
+          }))
+        )
     } catch (error) {
       setSpents([])
     } finally {
@@ -151,20 +157,26 @@ const IssuePage: React.FC = () => {
   const handleCreateComment = useCallback(async () => {
     try {
       setLoadingComment(true)
+      const contentUpload = JSON.stringify(
+        convertToRaw(content.getCurrentContent())
+      )
       const response = await createComment({
         issue_id: params.id,
         project_key: params.key,
-        content,
+        content: contentUpload,
       })
       if (isMounted.current) {
         setComments([
-          { ...response, user_name: user!.name, user_avatar: user!.avatar },
+          {
+            ...response,
+            user_name: user!.name,
+            user_avatar: user!.avatar,
+            content: stateToHTML(convertFromRaw(JSON.parse(response.content))),
+          },
           ...comments,
         ])
       }
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setContent('')
-      toastSuccess('')
+      setContent(EditorState.createEmpty())
     } catch (error: any) {
       const errors = error.data.errors as Record<string, string[]>
       if (errors) {
@@ -358,14 +370,7 @@ const IssuePage: React.FC = () => {
             <div>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={8}>
-                  <TextField
-                    label="Comment"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    fullWidth
-                    multiline
-                    rows={4}
-                  />
+                  <Editor setEditorState={setContent} editorState={content} />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <LoadingButton

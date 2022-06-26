@@ -34,6 +34,7 @@ const EditorComponent: React.FC<Props> = ({ editorState, setEditorState }) => {
     <Editor
       editorState={editorState}
       onEditorStateChange={setEditorState}
+      editorClassName="editor"
       toolbar={{
         inline: { inDropdown: true },
         image: {

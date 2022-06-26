@@ -153,7 +153,6 @@ const AccountistResults: React.FC<Props> = ({
       onConfirm: async () => {
         try {
           setLoadingDelete(true)
-          await new Promise((r) => setTimeout(r, 1000))
         } catch (err) {
         } finally {
           setLoadingDelete(false)

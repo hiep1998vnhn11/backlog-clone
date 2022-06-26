@@ -25,7 +25,7 @@ import { updateIssue } from '/@/api/issue'
 import React from 'react'
 import Page404 from '/@/pages/404'
 import Editor from '/@/components/Editor'
-import { EditorState, convertFromRaw } from 'draft-js'
+import { EditorState, convertFromRaw, convertToRaw } from 'draft-js'
 
 const AddIssue = () => {
   const { toastError, toastSuccess } = useApp()
@@ -150,7 +150,9 @@ const AddIssue = () => {
         await updateIssue(+params.id!, {
           tracker,
           subject,
-          description,
+          description: JSON.stringify(
+            convertToRaw(description.getCurrentContent())
+          ),
           start_date: startDate?.toISOString().split('T')[0],
           due_date: dueDate?.toISOString().split('T')[0],
           priority,
