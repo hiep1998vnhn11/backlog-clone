@@ -21,9 +21,7 @@ class ActivityController extends Controller
         if (!$project->hasPermissionShowIssue(auth()->user())) return $this->sendForbidden();
         $searchKey = $request->search_key ?? '';
         $assignee = $request->assignee ?? '';
-        $category = $request->category ?? '';
         $status = $request->status ?? '';
-
         $minStartDate = Carbon::now()->subDays(10);
         $endDateRequest = $request->end_date ?? '';
         $endDate = $endDateRequest ? Carbon::parse($endDateRequest) : Carbon::now();

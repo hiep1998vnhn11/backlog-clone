@@ -56,7 +56,6 @@ Route::group(
         Route::resource('account', AccountController::class);
         Route::get('/project/{project}/compact', [ProjectController::class, 'compact']);
         Route::resource('/project', ProjectController::class);
-        Route::resource('/category', CategoryController::class);
         Route::resource('/issue', IssueController::class);
         Route::resource('/member', MemberController::class);
         Route::resource('/activity', ActivityController::class);

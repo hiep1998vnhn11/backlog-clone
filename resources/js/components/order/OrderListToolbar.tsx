@@ -27,7 +27,6 @@ import {
 
 interface Props {
   handleChangeSearchKey: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleCategoryChange: (value: string) => void
   handleAssigneeChange: (value: string) => void
   setStatus: (value: string) => void
   searchKey: string
@@ -52,13 +51,9 @@ const OrderListToolbar: React.FC<Props> = (props) => {
   const [assigneeSelected, setAssigneeSelected] = useState<OptionItem | null>(
     null
   )
-  const [categorySelected, setCategorySelected] = useState<OptionItem | null>(
-    null
-  )
-  const { members, categories } = useMemberAndCategory(props.projectKey)
+  const { members } = useMemberAndCategory(props.projectKey)
   const {
     handleChangeSearchKey,
-    handleCategoryChange,
     handleAssigneeChange,
     searchKey,
     status,
@@ -73,13 +68,6 @@ const OrderListToolbar: React.FC<Props> = (props) => {
     (_: any, value: OptionItem | null) => {
       handleAssigneeChange(value ? value.value + '' : '')
       setAssigneeSelected(value)
-    },
-    []
-  )
-  const handleSelectedCategoryChange = useCallback(
-    (_: any, value: OptionItem | null) => {
-      handleCategoryChange(value ? value.value + '' : '')
-      setCategorySelected(value)
     },
     []
   )
@@ -165,21 +153,6 @@ const OrderListToolbar: React.FC<Props> = (props) => {
                   )}
                 />
               </Grid>
-              <Grid item md={2} xs={6}>
-                <Autocomplete
-                  disablePortal
-                  id="category"
-                  size="small"
-                  options={categories}
-                  value={categorySelected}
-                  onChange={handleSelectedCategoryChange}
-                  fullWidth
-                  renderInput={(params) => (
-                    <TextField {...params} label="Category" />
-                  )}
-                />
-              </Grid>
-
               <Grid item md={5} xs={12}>
                 <div className="flex gap-2">
                   <div className="flex-1">

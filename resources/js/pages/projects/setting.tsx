@@ -413,7 +413,6 @@ const Settings = () => {
           >
             <Tab label="General" {...a11yProps(0)} />
             <Tab label="Member" {...a11yProps(1)} />
-            <Tab label="Categories" {...a11yProps(2)} />
           </Tabs>
           <div>{primaryButtonMarkup()}</div>
         </Box>

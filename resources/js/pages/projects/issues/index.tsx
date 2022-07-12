@@ -57,7 +57,6 @@ const OrderPage = () => {
     searchKey,
     sortDirection,
     sortField,
-    category,
     assignee,
     status,
     dateType,
@@ -83,7 +82,7 @@ const OrderPage = () => {
     return () => {
       isMounted.current = false
     }
-  }, [page, limit, sortDirection, sortField, category, assignee, status])
+  }, [page, limit, sortDirection, sortField, assignee, status])
   const handleChangeSearchKey = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchKey(e.target.value)
@@ -108,7 +107,6 @@ const OrderPage = () => {
       <Container maxWidth={false}>
         <OrderListToolbar
           searchKey={searchKey}
-          handleCategoryChange={handleCategoryChange}
           handleAssigneeChange={handleAssigneeChange}
           handleChangeSearchKey={handleChangeSearchKey}
           projectKey={params.key!}
