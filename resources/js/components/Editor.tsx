@@ -39,7 +39,7 @@ const EditorComponent: React.FC<Props> = ({ editorState, setEditorState }) => {
         inline: { inDropdown: true },
         image: {
           uploadCallback: uploadCallback,
-          alt: { present: true, mandatory: true },
+          alt: { present: false, mandatory: false },
         },
       }}
     />
